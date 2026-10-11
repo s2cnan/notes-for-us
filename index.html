@@ -310,10 +310,17 @@
         function HomeView({ notes, folders, photos, isAdmin, onSelectNote, onSelectFolder, onCreateNote, onCreateFolder, onViewAllNotes, onViewAllPhotos }) {
             const displayedNotes = isAdmin ? notes : notes.filter(n => n.published);
 
+            // Anniversary calculation (May 19, 2025)
+            const anniversaryDate = new Date('2025-05-19T00:00:00');
+            const now = new Date();
+            const diffTime = Math.abs(now - anniversaryDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
             return (
                 <div className="space-y-8 animate-fadeIn">
                     <div className="text-center py-6 px-4 bg-warmBlush/40 rounded-2xl border border-warmBlush/60 space-y-2">
                         <h2 className="font-serif text-2xl font-normal">notes for me & rhy</h2>
+                        <p className="text-xs text-rose-400 font-medium tracking-wide">✨ together since may 19, 2025 • {diffDays} days ✨</p>
                         <p className="text-sm text-stone-600 max-w-md mx-auto font-light leading-relaxed">a quiet space for our thoughts, letters, photos, and memories.</p>
                         {isAdmin && (
                             <div className="pt-2 flex justify-center gap-3">
