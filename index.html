@@ -1,708 +1,469 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>notes for me & rhy</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cream: '#FDFBF7',
-                        warmBlush: '#F7EBE8',
-                        dustyRose: '#D4A3A3',
-                        charcoal: '#2C2A29',
-                        softLavender: '#EAE6F8'
-                    },
-                    fontFamily: {
-                        serif: ['Playfair Display', 'Georgia', 'serif'],
-                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel Standalone -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Firebase SDK Compat -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FDFBF7; color: #2C2A29; -webkit-tap-highlight-color: transparent; }
-        h1, h2, h3, h4, .font-serif { font-family: 'Playfair Display', serif; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D4A3A3; border-radius: 4px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FDFBF7">
+<title>notes for me &amp; rhy</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cream: '#FDFBF7',
+        warmBlush: '#F7EBE8',
+        dustyRose: '#D4A3A3',
+        charcoal: '#2C2A29',
+        softLavender: '#EAE6F8'
+      },
+      fontFamily: {
+        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif']
+      }
+    }
+  }
+};
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+<style>
+:root {
+  color-scheme: light;
+  --cream: #FDFBF7;
+  --blush: #F7EBE8;
+  --rose: #D4A3A3;
+  --ink: #2C2A29;
+}
+* { box-sizing: border-box; }
+html {
+  min-height: 100%;
+  background: var(--cream);
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3, h4, .serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+button, input, textarea, select { font: inherit; }
+button { touch-action: manipulation; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.safe-top { padding-top: max(12px, env(safe-area-inset-top)); }
+.safe-bottom { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 9px; }
+
+.field {
+  width: 100%;
+  border: 1px solid #e7e5e4;
+  background: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 14px;
+  min-width: 0;
+}
+.field:focus {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px #D4A3A322;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  padding: 10px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: opacity .15s, transform .15s;
+}
+.btn:active { transform: scale(.98); }
+.btn-dark { background: var(--ink); color: var(--cream); }
+.btn-soft { background: var(--blush); color: var(--ink); }
+.btn-white { background: white; border: 1px solid #e7e5e4; color: var(--ink); }
+.btn-danger { background: #fff1f2; color: #be123c; }
+.card {
+  background: white;
+  border: 1px solid #e7e5e4;
+  border-radius: 18px;
+  box-shadow: 0 3px 12px #2c2a2908;
+}
+.small-label {
+  display: block;
+  font-size: 11px;
+  color: #78716c;
+  margin-bottom: 6px;
+}
+.note-card { cursor: pointer; transition: border-color .15s; }
+.note-card:hover { border-color: var(--rose); }
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #eee7e5;
+}
+.bottom-nav { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+#toast {
+  position: fixed;
+  z-index: 100;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: #2c2a29;
+  color: white;
+  font-size: 12px;
+  box-shadow: 0 8px 30px #0002;
+}
+#modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: #1c191780;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal {
+  width: min(100%, 440px);
+  max-height: 85dvh;
+  overflow: auto;
+  background: var(--cream);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 20px 70px #0003;
+}
+.photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.empty {
+  padding: 28px 16px;
+  text-align: center;
+  border: 1px dashed #e7caca;
+  border-radius: 16px;
+  color: #a8a29e;
+  font-size: 13px;
+}
+@media (min-width: 640px) {
+  .page { padding-top: 30px !important; }
+  .main-shell { max-width: 720px; }
+  .brand-title { font-size: 21px; }
+}
+</style>
 </head>
-<body class="h-full bg-cream text-charcoal antialiased selection:bg-warmBlush">
-    <div id="root" class="h-full"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<body>
+<div id="app" class="min-h-screen"></div>
+<div id="toast" hidden></div>
+<div id="modal-root"></div>
 
-        // Your Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDi1QnBd-rPnhbPF75iXd8u99FGKJLkV7Y",
-            authDomain: "notes-for-me-and-rhy.firebaseapp.com",
-            projectId: "notes-for-me-and-rhy",
-            storageBucket: "notes-for-me-and-rhy.firebasestorage.app",
-            messagingSenderId: "356957167276",
-            appId: "1:356957167276:web:ea399abac3ee4493b2c909",
-            measurementId: "G-0QK1QQ6SX4"
-        };
+<script>
+(() => {
+'use strict';
 
-        // Initialize Firebase
-        let db = null;
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            db = firebase.firestore();
-        } catch (e) {
-            console.log("Firebase init error", e);
-        }
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
-        const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
+const uid = () => 'id-' + (
+  crypto.randomUUID
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now()
+);
 
-        const initialNotes = [
-            {
-                id: 'note-1',
-                title: 'little moments in leyte',
-                content: 'today was quiet and peaceful. the afternoon sun felt warm against the glass, and listening to your voice note made the whole day feel lighter. notes for me & rhy is our little corner of the internet to keep these small memories safe.',
-                folderId: 'folder-memories',
-                tags: ['memories', 'thoughts'],
-                published: true,
-                author: 'Ronan',
-                createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-                updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-                images: []
-            },
-            {
-                id: 'note-2',
-                title: 'a letter for tomorrow',
-                content: 'just wanted to remind you how much every single conversation means to me. no matter how busy things get with college and everything else, this place is always here for us.',
-                folderId: 'folder-letters',
-                tags: ['letters'],
-                published: true,
-                author: 'Rhy',
-                createdAt: new Date(Date.now() - 86400000).toISOString(),
-                updatedAt: new Date(Date.now() - 86400000).toISOString(),
-                images: []
-            }
-        ];
+const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+})[char]);
 
-        const initialFolders = [
-            { id: 'folder-memories', name: 'memories', description: 'our everyday moments', color: '#D4A3A3', visibility: 'public' },
-            { id: 'folder-letters', name: 'letters', description: 'notes written just for us', color: '#EAE6F8', visibility: 'shared' },
-            { id: 'folder-photos', name: 'our pictures', description: 'snapshots and memories', color: '#F7EBE8', visibility: 'public' }
-        ];
+const dateLabel = value => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+};
 
-        function App() {
-            const [notes, setNotes] = useState([]);
-            const [folders, setFolders] = useState([]);
-            const [photos, setPhotos] = useState([]);
-            const [currentUser, setCurrentUser] = useState(() => localStorage.getItem('rhythm_current_user') || null);
-            const [currentView, setCurrentView] = useState('home');
-            const [activeNote, setActiveNote] = useState(null);
-            const [activeFolder, setActiveFolder] = useState(null);
-            const [searchQuery, setSearchQuery] = useState('');
-            const [toast, setToast] = useState(null);
+/* Firebase configuration */
+const CONFIG = {
+  apiKey: "AIzaSyDi1QnBd-rPnhbPF75iXd8u99FGKJLkV7Y",
+  authDomain: "notes-for-me-and-rhy.firebaseapp.com",
+  projectId: "notes-for-me-and-rhy",
+  storageBucket: "notes-for-me-and-rhy.firebasestorage.app",
+  messagingSenderId: "356957167276",
+  appId: "1:356957167276:web:ea399abac3ee4493b2c909",
+  measurementId: "G-0QK1QQ6SX4"
+};
 
-            // Real-time Firestore sync
-            useEffect(() => {
-                if (db) {
-                    const unsubNotes = db.collection('notes').onSnapshot(snapshot => {
-                        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        setNotes(items.length ? items : initialNotes);
-                    });
-                    const unsubFolders = db.collection('folders').onSnapshot(snapshot => {
-                        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        setFolders(items.length ? items : initialFolders);
-                    });
-                    const unsubPhotos = db.collection('photos').onSnapshot(snapshot => {
-                        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        setPhotos(items);
-                    });
-                    return () => { unsubNotes(); unsubFolders(); unsubPhotos(); };
-                }
-            }, []);
+const SAMPLE_NOTES = [
+  {
+    id: 'note-1',
+    title: 'little moments in leyte',
+    content: 'today was quiet and peaceful. the afternoon sun felt warm against the glass, and listening to your voice note made the whole day feel lighter. notes for me & rhy is our little corner of the internet to keep these small memories safe.',
+    folderId: 'folder-memories',
+    tags: ['memories', 'thoughts'],
+    published: true,
+    author: 'Ronan',
+    createdAt: '2025-05-21T08:00:00.000Z',
+    updatedAt: '2025-05-21T08:00:00.000Z',
+    images: []
+  },
+  {
+    id: 'note-2',
+    title: 'a letter for tomorrow',
+    content: 'just wanted to remind you how much every single conversation means to me. no matter how busy things get with college and everything else, this place is always here for us.',
+    folderId: 'folder-letters',
+    tags: ['letters'],
+    published: true,
+    author: 'Rhy',
+    createdAt: '2025-05-22T08:00:00.000Z',
+    updatedAt: '2025-05-22T08:00:00.000Z',
+    images: []
+  }
+];
 
-            const saveNoteToDb = async (note) => {
-                if (db) await db.collection('notes').doc(note.id).set(note);
-            };
+const SAMPLE_FOLDERS = [
+  {
+    id: 'folder-memories',
+    name: 'memories',
+    description: 'our everyday moments',
+    color: '#D4A3A3',
+    visibility: 'public'
+  },
+  {
+    id: 'folder-letters',
+    name: 'letters',
+    description: 'notes written just for us',
+    color: '#EAE6F8',
+    visibility: 'shared'
+  },
+  {
+    id: 'folder-photos',
+    name: 'our pictures',
+    description: 'snapshots and memories',
+    color: '#F7EBE8',
+    visibility: 'public'
+  }
+];
 
-            const deleteNoteFromDb = async (id) => {
-                if (db) await db.collection('notes').doc(id).delete();
-            };
+let db = null;
+let storage = null;
+let cloudError = '';
 
-            const saveFolderToDb = async (folder) => {
-                if (db) await db.collection('folders').doc(folder.id).set(folder);
-            };
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(CONFIG);
+  }
+  db = firebase.firestore();
 
-            const savePhotoToDb = async (photo) => {
-                if (db) await db.collection('photos').doc(photo.id).set(photo);
-            };
+  try {
+    storage = firebase.storage();
+  } catch (error) {
+    console.warn('Firebase Storage unavailable:', error);
+  }
+} catch (error) {
+  cloudError = 'Firebase could not initialize. Running in this browser only.';
+  console.error('Firebase initialization failed:', error);
+}
 
-            const deletePhotoFromDb = async (id) => {
-                if (db) await db.collection('photos').doc(id).delete();
-            };
+const state = {
+  user: sessionStorage.getItem('notes_user') || null,
+  view: 'home',
+  notes: [],
+  folders: [],
+  photos: [],
+  search: '',
+  activeNoteId: null,
+  activeFolderId: null,
+  busy: false,
+  unsubs: [],
+  toastTimer: null
+};
 
-            useEffect(() => {
-                if (currentUser) localStorage.setItem('rhythm_current_user', currentUser);
-                else localStorage.removeItem('rhythm_current_user');
-            }, [currentUser]);
+function toast(message) {
+  const element = $('#toast');
+  element.textContent = message;
+  element.hidden = false;
+  clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(() => {
+    element.hidden = true;
+  }, 3200);
+}
 
-            const showToast = (message) => {
-                setToast(message);
-                setTimeout(() => setToast(null), 3000);
-            };
+function icon(name, size = 17) {
+  return `<i data-lucide="${esc(name)}" width="${size}" height="${size}" aria-hidden="true"></i>`;
+}
 
-            useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            }, [currentView, notes, folders, photos, toast, currentUser]);
+function refreshIcons() {
+  if (window.lucide) window.lucide.createIcons();
+}
 
-            const isAdmin = currentUser && currentUser !== 'guest';
+function persistLocal() {
+  try {
+    localStorage.setItem('notes_local_notes', JSON.stringify(state.notes));
+    localStorage.setItem('notes_local_folders', JSON.stringify(state.folders));
+    localStorage.setItem('notes_local_photos', JSON.stringify(state.photos));
+  } catch (error) {
+    console.warn('Local cache could not be saved:', error);
+  }
+}
 
-            if (!currentUser) {
-                return <LoginScreen onLogin={(user) => { setCurrentUser(user); showToast(`Welcome, ${user === 'guest' ? 'Guest' : user}!`); }} />;
-            }
+function loadLocal() {
+  try {
+    state.notes = JSON.parse(localStorage.getItem('notes_local_notes') || 'null')
+      || SAMPLE_NOTES.map(note => ({ ...note }));
 
-            return (
-                <div className="min-h-full flex flex-col bg-cream text-charcoal">
-                    {toast && (
-                        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 bg-charcoal text-cream px-4 py-2 rounded-full text-sm shadow-lg transition-all animate-bounce">
-                            {toast}
-                        </div>
-                    )}
+    state.folders = JSON.parse(localStorage.getItem('notes_local_folders') || 'null')
+      || SAMPLE_FOLDERS.map(folder => ({ ...folder }));
 
-                    <header className="sticky top-0 z-40 bg-cream/85 backdrop-blur-md border-b border-warmBlush px-4 py-3">
-                        <div className="max-w-2xl mx-auto flex items-center justify-between">
-                            <button onClick={() => setCurrentView('home')} className="text-left">
-                                <h1 className="font-serif text-lg tracking-tight font-medium">notes for me & rhy</h1>
-                                <p className="text-xs text-stone-500 font-light">digital journal & memories</p>
-                            </button>
-                            
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-warmBlush text-charcoal font-medium">
-                                    {isAdmin ? `✨ ${currentUser}` : '👀 guest'}
-                                </span>
-                                <button onClick={() => setCurrentUser(null)} className="text-xs text-stone-500 hover:text-charcoal px-2 py-1 underline">
-                                    logout
-                                </button>
-                            </div>
-                        </div>
-                    </header>
+    state.photos = JSON.parse(localStorage.getItem('notes_local_photos') || '[]') || [];
+  } catch (error) {
+    state.notes = SAMPLE_NOTES.map(note => ({ ...note }));
+    state.folders = SAMPLE_FOLDERS.map(folder => ({ ...folder }));
+    state.photos = [];
+  }
+}
 
-                    <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 pb-24">
-                        {currentView === 'home' && (
-                            <HomeView 
-                                notes={notes} folders={folders} photos={photos} isAdmin={isAdmin}
-                                onSelectNote={(n) => { setActiveNote(n); setCurrentView('view-note'); }}
-                                onSelectFolder={(f) => { setActiveFolder(f); setCurrentView('folder-detail'); }}
-                                onCreateNote={() => { setActiveNote(null); setCurrentView('editor'); }}
-                                onCreateFolder={() => {
-                                    const name = prompt('Enter folder name:');
-                                    if (name) {
-                                        saveFolderToDb({ id: generateId(), name, description: '', color: '#F7EBE8', visibility: 'public' });
-                                        showToast('Folder created!');
-                                    }
-                                }}
-                                onViewAllNotes={() => setCurrentView('notes')}
-                                onViewAllPhotos={() => setCurrentView('photos')}
-                            />
-                        )}
+function isAdmin() {
+  return state.user === 'Ronan' || state.user === 'Rhy';
+}
 
-                        {currentView === 'notes' && (
-                            <AllNotesView 
-                                notes={notes} isAdmin={isAdmin} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-                                onSelectNote={(n) => { setActiveNote(n); setCurrentView('view-note'); }}
-                                onBack={() => setCurrentView('home')}
-                                onCreateNote={() => { setActiveNote(null); setCurrentView('editor'); }}
-                            />
-                        )}
+function visibleNotes() {
+  return state.notes.filter(note => isAdmin() || note.published === true);
+}
 
-                        {currentView === 'view-note' && activeNote && (
-                            <NoteDetailView 
-                                note={activeNote} folders={folders} isAdmin={isAdmin} currentUser={currentUser}
-                                onBack={() => setCurrentView('home')}
-                                onEdit={() => setCurrentView('editor')}
-                                onDelete={() => {
-                                    if (confirm('Delete this note?')) {
-                                        deleteNoteFromDb(activeNote.id);
-                                        setCurrentView('home');
-                                        showToast('Note deleted.');
-                                    }
-                                }}
-                            />
-                        )}
+function getFolder(id) {
+  return state.folders.find(folder => folder.id === id);
+}
 
-                        {currentView === 'editor' && isAdmin && (
-                            <NoteEditorView 
-                                initialNote={activeNote} folders={folders} currentUser={currentUser}
-                                onSave={(savedNote) => {
-                                    saveNoteToDb(savedNote);
-                                    setCurrentView('home');
-                                    showToast('Note saved successfully!');
-                                }}
-                                onCancel={() => setCurrentView('home')}
-                            />
-                        )}
+function anniversary() {
+  const start = new Date(2025, 4, 19);
+  const now = new Date();
+  const elapsed = Math.max(0, Math.floor((now - start) / 86400000));
 
-                        {currentView === 'folder-detail' && activeFolder && (
-                            <FolderDetailView 
-                                folder={activeFolder}
-                                notes={notes.filter(n => n.folderId === activeFolder.id)}
-                                photos={photos.filter(p => p.folderId === activeFolder.id)}
-                                isAdmin={isAdmin}
-                                onBack={() => setCurrentView('home')}
-                                onSelectNote={(n) => { setActiveNote(n); setCurrentView('view-note'); }}
-                                onAddPhoto={(photoUrl, caption) => {
-                                    savePhotoToDb({ id: generateId(), url: photoUrl, caption, folderId: activeFolder.id, createdAt: new Date().toISOString() });
-                                    showToast('Photo added!');
-                                }}
-                            />
-                        )}
+  let next = new Date(now.getFullYear(), 4, 19);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-                        {currentView === 'photos' && (
-                            <PhotosView 
-                                photos={photos} folders={folders} isAdmin={isAdmin}
-                                onBack={() => setCurrentView('home')}
-                                onAddPhoto={(photoUrl, caption, folderId) => {
-                                    savePhotoToDb({ id: generateId(), url: photoUrl, caption, folderId: folderId || '', createdAt: new Date().toISOString() });
-                                    showToast('Photo added to memories!');
-                                }}
-                                onDeletePhoto={(id) => {
-                                    deletePhotoFromDb(id);
-                                    showToast('Photo removed.');
-                                }}
-                            />
-                        )}
-                    </main>
+  if (next < today) {
+    next = new Date(now.getFullYear() + 1, 4, 19);
+  }
 
-                    <nav className="fixed bottom-0 left-0 right-0 bg-cream/90 backdrop-blur-md border-t border-warmBlush py-3 px-6 z-30">
-                        <div className="max-w-xs mx-auto flex justify-around items-center">
-                            <button onClick={() => setCurrentView('home')} className={`flex flex-col items-center gap-1 text-xs ${currentView === 'home' ? 'text-charcoal font-semibold' : 'text-stone-400'}`}>
-                                <i data-lucide="home" className="w-5 h-5"></i><span>home</span>
-                            </button>
-                            <button onClick={() => setCurrentView('notes')} className={`flex flex-col items-center gap-1 text-xs ${currentView === 'notes' ? 'text-charcoal font-semibold' : 'text-stone-400'}`}>
-                                <i data-lucide="book-open" className="w-5 h-5"></i><span>notes</span>
-                            </button>
-                            {isAdmin && (
-                                <button onClick={() => { setActiveNote(null); setCurrentView('editor'); }} className="flex flex-col items-center gap-1 text-xs text-rose-500 font-semibold bg-warmBlush p-2 rounded-full -mt-4 shadow-sm">
-                                    <i data-lucide="plus" className="w-6 h-6"></i>
-                                </button>
-                            )}
-                            <button onClick={() => setCurrentView('photos')} className={`flex flex-col items-center gap-1 text-xs ${currentView === 'photos' ? 'text-charcoal font-semibold' : 'text-stone-400'}`}>
-                                <i data-lucide="image" className="w-5 h-5"></i><span>photos</span>
-                            </button>
-                            {isAdmin && (
-                                <button onClick={() => {
-                                    const name = prompt('New folder name:');
-                                    if (name) {
-                                        saveFolderToDb({ id: generateId(), name, description: '', color: '#F7EBE8', visibility: 'public' });
-                                        showToast('Folder created!');
-                                    }
-                                }} className="flex flex-col items-center gap-1 text-xs text-stone-400">
-                                    <i data-lucide="folder-plus" className="w-5 h-5"></i><span>folder</span>
-                                </button>
-                            )}
-                        </div>
-                    </nav>
-                </div>
-            );
-        }
+  const days = Math.ceil((next - today) / 86400000);
 
-        function LoginScreen({ onLogin }) {
-            const [selectedUser, setSelectedUser] = useState(null);
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState('');
+  return {
+    elapsed,
+    days,
+    nextYear: next.getFullYear()
+  };
+}
 
-            const handleLoginSubmit = (e) => {
-                e.preventDefault();
-                if (password === 'Admin123') onLogin(selectedUser);
-                else setError('Incorrect password.');
-            };
+/* Firestore listeners: each collection handles its own errors. */
+function loadCloud() {
+  if (!db) {
+    render();
+    return;
+  }
 
-            return (
-                <div className="min-h-full flex items-center justify-center p-4 bg-cream">
-                    <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-stone-200 shadow-sm space-y-6 text-center">
-                        <div>
-                            <h1 className="font-serif text-2xl mb-1">notes for me & rhy</h1>
-                            <p className="text-xs text-stone-500 font-light">select your profile or continue as guest</p>
-                        </div>
+  const subscribe = (collection, apply, fallback) => {
+    const unsubscribe = db.collection(collection).onSnapshot(
+      snapshot => {
+        const rows = snapshot.docs.map(document => ({
+          ...document.data(),
+          id: document.id
+        }));
 
-                        {!selectedUser ? (
-                            <div className="space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button onClick={() => setSelectedUser('Ronan')} className="p-4 rounded-xl border border-stone-200 bg-warmBlush/30 hover:border-dustyRose font-serif text-lg transition-all">Ronan</button>
-                                    <button onClick={() => setSelectedUser('Rhy')} className="p-4 rounded-xl border border-stone-200 bg-warmBlush/30 hover:border-dustyRose font-serif text-lg transition-all">Rhy</button>
-                                </div>
-                                <button onClick={() => onLogin('guest')} className="w-full py-3 rounded-xl border border-stone-200 text-stone-600 text-sm hover:bg-stone-50 transition-all">👀 continue as guest</button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleLoginSubmit} className="space-y-4">
-                                <div className="text-sm font-medium text-stone-700">Logging in as <span className="font-serif text-rose-500 font-bold">{selectedUser}</span></div>
-                                <input type="password" placeholder="enter password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 text-sm text-center focus:outline-none focus:border-dustyRose" autoFocus />
-                                {error && <p className="text-xs text-rose-500">{error}</p>}
-                                <div className="flex gap-2">
-                                    <button type="button" onClick={() => { setSelectedUser(null); setPassword(''); setError(''); }} className="flex-1 py-2.5 rounded-xl border border-stone-200 text-xs text-stone-600">back</button>
-                                    <button type="submit" className="flex-1 py-2.5 rounded-xl bg-charcoal text-cream text-xs font-medium">login</button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-                </div>
-            );
-        }
+        apply(rows.length ? rows : fallback);
+        persistLocal();
+        render();
+      },
+      error => {
+        console.error(`Firestore ${collection} error:`, error);
+        cloudError = `Could not sync ${collection}. Check your Firebase connection and rules.`;
+        render();
+      }
+    );
 
-        function HomeView({ notes, folders, photos, isAdmin, onSelectNote, onSelectFolder, onCreateNote, onCreateFolder, onViewAllNotes, onViewAllPhotos }) {
-            const displayedNotes = isAdmin ? notes : notes.filter(n => n.published);
-            const anniversaryDate = new Date('2025-05-19T00:00:00');
-            const now = new Date();
-            const diffDays = Math.floor(Math.abs(now - anniversaryDate) / (1000 * 60 * 60 * 24));
+    state.unsubs.push(unsubscribe);
+  };
 
-            return (
-                <div className="space-y-8 animate-fadeIn">
-                    <div className="text-center py-6 px-4 bg-warmBlush/40 rounded-2xl border border-warmBlush/60 space-y-2">
-                        <h2 className="font-serif text-2xl font-normal">notes for me & rhy</h2>
-                        <p className="text-xs text-rose-400 font-medium tracking-wide">✨ together since may 19, 2025 • {diffDays} days ✨</p>
-                        <p className="text-sm text-stone-600 max-w-md mx-auto font-light leading-relaxed">a quiet space for our thoughts, letters, photos, and memories.</p>
-                        {isAdmin && (
-                            <div className="pt-2 flex justify-center gap-3">
-                                <button onClick={onCreateNote} className="px-4 py-2 bg-charcoal text-cream rounded-full text-xs font-medium shadow-sm hover:opacity-90 flex items-center gap-2">
-                                    <i data-lucide="pen-tool" className="w-3.5 h-3.5"></i> write a note
-                                </button>
-                                <button onClick={onCreateFolder} className="px-4 py-2 bg-white text-charcoal border border-stone-200 rounded-full text-xs font-medium hover:bg-stone-50 flex items-center gap-2">
-                                    <i data-lucide="folder-plus" className="w-3.5 h-3.5"></i> new folder
-                                </button>
-                            </div>
-                        )}
-                    </div>
+  subscribe('notes', rows => {
+    state.notes = rows;
+  }, SAMPLE_NOTES.map(note => ({ ...note })));
 
-                    <div>
-                        <div className="flex justify-between items-center mb-3">
-                            <h3 className="font-serif text-lg">folders</h3>
-                            <span className="text-xs text-stone-400">{folders.length} folders</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            {folders.map(folder => (
-                                <div key={folder.id} onClick={() => onSelectFolder(folder)} className="p-4 rounded-xl border border-stone-200/80 bg-white hover:border-dustyRose transition-all cursor-pointer shadow-sm">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <i data-lucide="folder" className="w-5 h-5 text-dustyRose"></i>
-                                        <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">{folder.visibility}</span>
-                                    </div>
-                                    <h4 className="font-serif font-medium text-base mb-1">{folder.name}</h4>
-                                    {folder.description && <p className="text-xs text-stone-500 line-clamp-1">{folder.description}</p>}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+  subscribe('folders', rows => {
+    state.folders = rows;
+  }, SAMPLE_FOLDERS.map(folder => ({ ...folder })));
 
-                    <div>
-                        <div className="flex justify-between items-center mb-3">
-                            <h3 className="font-serif text-lg">recent notes</h3>
-                            <button onClick={onViewAllNotes} className="text-xs text-stone-500 hover:underline">view all</button>
-                        </div>
-                        <div className="space-y-3">
-                            {displayedNotes.slice(0, 3).map(note => (
-                                <div key={note.id} onClick={() => onSelectNote(note)} className="p-4 rounded-xl bg-white border border-stone-200/80 hover:border-dustyRose transition-all cursor-pointer shadow-sm">
-                                    <div className="flex items-center justify-between text-xs text-stone-400 mb-1">
-                                        <span>{new Date(note.createdAt).toLocaleDateString()} {note.author && `• by ${note.author}`}</span>
-                                    </div>
-                                    <h4 className="font-serif text-lg mb-1">{note.title || 'untitled'}</h4>
-                                    <p className="text-sm text-stone-600 line-clamp-2 font-light">{note.content}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+  subscribe('photos', rows => {
+    state.photos = rows;
+  }, []);
+}
 
-                    <div>
-                        <div className="flex justify-between items-center mb-3">
-                            <h3 className="font-serif text-lg">photo memories</h3>
-                            <button onClick={onViewAllPhotos} className="text-xs text-stone-500 hover:underline">view gallery</button>
-                        </div>
-                        {photos.length === 0 ? (
-                            <p className="text-sm text-stone-400 italic">No photos uploaded yet.</p>
-                        ) : (
-                            <div className="grid grid-cols-3 gap-2">
-                                {photos.slice(0, 3).map(photo => (
-                                    <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-stone-100 border border-stone-200">
-                                        <img src={photo.url} alt={photo.caption || 'memory'} className="w-full h-full object-cover" />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
+async function writeDoc(collection, item) {
+  if (db) {
+    await db.collection(collection).doc(item.id).set(item);
+    return;
+  }
 
-        function AllNotesView({ notes, isAdmin, searchQuery, setSearchQuery, onSelectNote, onBack, onCreateNote }) {
-            const filteredNotes = notes.filter(n => (isAdmin || n.published) && (n.title.toLowerCase().includes(searchQuery.toLowerCase()) || n.content.toLowerCase().includes(searchQuery.toLowerCase())));
+  const array = collection === 'notes'
+    ? state.notes
+    : collection === 'folders'
+      ? state.folders
+      : state.photos;
 
-            return (
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1">
-                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back home
-                        </button>
-                        <h2 className="font-serif text-xl">all notes</h2>
-                        {isAdmin ? <button onClick={onCreateNote} className="text-xs bg-charcoal text-cream px-3 py-1.5 rounded-full">new note</button> : <div />}
-                    </div>
+  const index = array.findIndex(existing => existing.id === item.id);
 
-                    <div className="relative">
-                        <i data-lucide="search" className="absolute left-3 top-3 w-4 h-4 text-stone-400"></i>
-                        <input type="text" placeholder="search notes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-2 rounded-xl bg-white border border-stone-200 text-sm focus:outline-none focus:border-dustyRose" />
-                    </div>
+  if (index >= 0) array[index] = item;
+  else array.unshift(item);
 
-                    <div className="space-y-3">
-                        {filteredNotes.map(note => (
-                            <div key={note.id} onClick={() => onSelectNote(note)} className="p-4 rounded-xl bg-white border border-stone-200/80 hover:border-dustyRose transition-all cursor-pointer shadow-sm">
-                                <div className="flex items-center justify-between text-xs text-stone-400 mb-1">
-                                    <span>{new Date(note.createdAt).toLocaleDateString()} {note.author && `• by ${note.author}`}</span>
-                                    {!note.published && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px]">draft</span>}
-                                </div>
-                                <h4 className="font-serif text-lg mb-1">{note.title || 'untitled'}</h4>
-                                <p className="text-sm text-stone-600 line-clamp-2 font-light">{note.content}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
+  persistLocal();
+}
 
-        function NoteDetailView({ note, folders, isAdmin, currentUser, onBack, onEdit, onDelete }) {
-            const folder = folders.find(f => f.id === note.folderId);
+async function deleteDoc(collection, id) {
+  if (db) {
+    await db.collection(collection).doc(id).delete();
+    return;
+  }
 
-            return (
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1">
-                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back
-                        </button>
-                        {isAdmin && (
-                            <div className="flex items-center gap-2">
-                                <button onClick={onEdit} className="text-xs bg-stone-100 px-3 py-1 rounded-full text-stone-600">edit</button>
-                                <button onClick={onDelete} className="text-xs bg-rose-50 text-rose-600 px-3 py-1 rounded-full">delete</button>
-                            </div>
-                        )}
-                    </div>
+  const array = collection === 'notes'
+    ? state.notes
+    : collection === 'folders'
+      ? state.folders
+      : state.photos;
 
-                    <article className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm space-y-4">
-                        <div className="flex items-center justify-between text-xs text-stone-400 border-b border-stone-100 pb-3">
-                            <span>{new Date(note.createdAt).toLocaleDateString()} {note.author && `• written by ${note.author}`}</span>
-                            {folder && <span className="text-rose-400 font-medium">{folder.name}</span>}
-                        </div>
-                        <h2 className="font-serif text-2xl font-normal">{note.title || 'untitled'}</h2>
-                        <div className="text-stone-700 font-light leading-relaxed whitespace-pre-wrap text-base">{note.content}</div>
-                        {note.images && note.images.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 pt-4">
-                                {note.images.map((img, idx) => (
-                                    <div key={idx} className="rounded-lg overflow-hidden border border-stone-200">
-                                        <img src={img} alt="attachment" className="w-full h-40 object-cover" />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </article>
-                </div>
-            );
-        }
+  const index = array.findIndex(item => item.id === id);
+  if (index >= 0) array.splice(index, 1);
 
-        function NoteEditorView({ initialNote, folders, currentUser, onSave, onCancel }) {
-            const [title, setTitle] = useState(initialNote ? initialNote.title : '');
-            const [content, setContent] = useState(initialNote ? initialNote.content : '');
-            const [folderId, setFolderId] = useState(initialNote ? initialNote.folderId : (folders[0]?.id || ''));
-            const [published, setPublished] = useState(initialNote ? initialNote.published : true);
-            const [images, setImages] = useState(initialNote ? initialNote.images || [] : []);
-
-            const handleImageUpload = (e) => {
-                const files = Array.from(e.target.files);
-                files.forEach(file => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setImages(prev => [...prev, reader.result]);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            };
-
-            const handleSave = (e) => {
-                e.preventDefault();
-                onSave({
-                    id: initialNote ? initialNote.id : generateId(),
-                    title, content, folderId, published, images,
-                    author: initialNote ? initialNote.author : currentUser,
-                    createdAt: initialNote ? initialNote.createdAt : new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                });
-            };
-
-            return (
-                <form onSubmit={handleSave} className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <button type="button" onClick={onCancel} className="text-xs text-stone-500">cancel</button>
-                        <h2 className="font-serif text-lg">{initialNote ? 'edit note' : 'new note'}</h2>
-                        <button type="submit" className="text-xs bg-charcoal text-cream px-4 py-1.5 rounded-full font-medium">save</button>
-                    </div>
-
-                    <input type="text" placeholder="note title..." value={title} onChange={(e) => setTitle(e.target.value)} className="w-full font-serif text-2xl bg-transparent border-b border-stone-200 pb-2 focus:outline-none focus:border-dustyRose" />
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-xs text-stone-400 block mb-1">folder</label>
-                            <select value={folderId} onChange={(e) => setFolderId(e.target.value)} className="w-full p-2 rounded-xl bg-white border border-stone-200 text-sm focus:outline-none">
-                                <option value="">(unfiled)</option>
-                                {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-xs text-stone-400 block mb-1">status</label>
-                            <select value={published ? 'true' : 'false'} onChange={(e) => setPublished(e.target.value === 'true')} className="w-full p-2 rounded-xl bg-white border border-stone-200 text-sm focus:outline-none">
-                                <option value="true">published</option>
-                                <option value="false">draft</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <textarea rows="10" placeholder="write your thoughts here..." value={content} onChange={(e) => setContent(e.target.value)} className="w-full p-4 rounded-xl bg-white border border-stone-200 text-sm font-light leading-relaxed focus:outline-none focus:border-dustyRose"></textarea>
-
-                    <div className="space-y-2">
-                        <label className="text-xs text-stone-500 block">attach photos from device</label>
-                        <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="text-xs text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:bg-warmBlush file:text-charcoal hover:file:bg-dustyRose/30" />
-                        {images.length > 0 && (
-                            <div className="grid grid-cols-3 gap-2 pt-2">
-                                {images.map((img, i) => (
-                                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden border">
-                                        <img src={img} alt="preview" className="w-full h-full object-cover" />
-                                        <button type="button" onClick={() => setImages(images.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 text-[10px]">×</button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </form>
-            );
-        }
-
-        function FolderDetailView({ folder, notes, photos, isAdmin, onBack, onSelectNote, onAddPhoto }) {
-            const handleFileUpload = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const caption = prompt('Enter a short caption (optional):');
-                        onAddPhoto(reader.result, caption || '');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-
-            return (
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1">
-                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back
-                        </button>
-                        <h2 className="font-serif text-xl">{folder.name}</h2>
-                        {isAdmin && (
-                            <label className="text-xs bg-warmBlush px-3 py-1.5 rounded-full text-charcoal cursor-pointer">
-                                add photo <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                            </label>
-                        )}
-                    </div>
-
-                    {folder.description && <p className="text-sm text-stone-600 font-light bg-warmBlush/30 p-3 rounded-xl">{folder.description}</p>}
-
-                    <div>
-                        <h3 className="font-serif text-lg mb-3">notes in this folder</h3>
-                        <div className="space-y-3">
-                            {notes.map(note => (
-                                <div key={note.id} onClick={() => onSelectNote(note)} className="p-4 rounded-xl bg-white border border-stone-200/80 cursor-pointer shadow-sm">
-                                    <h4 className="font-serif text-lg mb-1">{note.title || 'untitled'}</h4>
-                                    <p className="text-sm text-stone-600 line-clamp-1 font-light">{note.content}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="font-serif text-lg mb-3">photos in this folder</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            {photos.map(photo => (
-                                <div key={photo.id} className="bg-white p-2 rounded-xl border border-stone-200 shadow-sm space-y-2">
-                                    <div className="aspect-square rounded-lg overflow-hidden bg-stone-100">
-                                        <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />
-                                    </div>
-                                    {photo.caption && <p className="text-xs text-stone-600 font-light">{photo.caption}</p>}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        function PhotosView({ photos, folders, isAdmin, onBack, onAddPhoto, onDeletePhoto }) {
-            const handleFileUpload = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const caption = prompt('Enter a caption (optional):');
-                        const folderId = prompt(`Choose folder ID or leave blank:\n${folders.map(f => `${f.name}:${f.id}`).join('\n')}`);
-                        onAddPhoto(reader.result, caption || '', folderId);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-
-            return (
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1">
-                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back
-                        </button>
-                        <h2 className="font-serif text-xl">photo memories</h2>
-                        {isAdmin && (
-                            <label className="text-xs bg-charcoal text-cream px-3 py-1.5 rounded-full cursor-pointer">
-                                upload photo <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                            </label>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        {photos.map(photo => (
-                            <div key={photo.id} className="bg-white p-2 rounded-xl border border-stone-200 shadow-sm space-y-2 relative group">
-                                <div className="aspect-square rounded-lg overflow-hidden bg-stone-100">
-                                    <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />
-                                </div>
-                                {photo.caption && <p className="text-xs text-stone-600 font-light">{photo.caption}</p>}
-                                {isAdmin && (
-                                    <button onClick={() => onDeletePhoto(photo.id)} className="absolute top-4 right-4 bg-white/80 p-1 rounded-full text-rose-600 hover:bg-white">
-                                        <i data-lucide="trash-2" className="w-4 h-4"></i>
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
-</body>
-</html>
+  persistLocal();
+}
