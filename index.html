@@ -1,1367 +1,1159 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FDFBF7">
-<title>notes for me &amp; rhy</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#fff8f5">
+  <title>notes for me & rhy ♡</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        cream:'#FDFBF7',
-        warmBlush:'#F7EBE8',
-        dustyRose:'#D4A3A3',
-        charcoal:'#2C2A29',
-        softLavender:'#EAE6F8'
-      },
-      fontFamily: {
-        serif:['Playfair Display','Georgia','serif'],
-        sans:['Plus Jakarta Sans','system-ui','sans-serif']
-      }
+  <style>
+    :root {
+      --bg: #fff8f5;
+      --paper: #ffffff;
+      --pink: #f5b8c8;
+      --pink-dark: #d96f91;
+      --text: #493942;
+      --muted: #9b8790;
+      --border: #f0dfe5;
+      --soft: #fff0f4;
+      --danger: #c94d67;
+      --shadow: 0 12px 35px rgba(116, 67, 84, .08);
     }
-  }
-};
-</script>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    * { box-sizing: border-box; }
 
-<style>
-:root {
-  color-scheme:light;
-  --cream:#FDFBF7;
-  --blush:#F7EBE8;
-  --rose:#D4A3A3;
-  --ink:#2C2A29;
-}
-* { box-sizing:border-box; }
-html { min-height:100%; background:var(--cream); -webkit-text-size-adjust:100%; }
-body {
-  margin:0;
-  min-height:100vh;
-  background:var(--cream);
-  color:var(--ink);
-  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
-  -webkit-tap-highlight-color:transparent;
-}
-h1,h2,h3,h4,.serif { font-family:'Playfair Display',Georgia,serif; }
-button,input,textarea,select { font:inherit; }
-button { touch-action:manipulation; cursor:pointer; }
-button:disabled { opacity:.55; cursor:not-allowed; }
-.safe-top { padding-top:max(12px,env(safe-area-inset-top)); }
-.safe-bottom { padding-bottom:max(12px,env(safe-area-inset-bottom)); }
-::-webkit-scrollbar { width:4px; height:4px; }
-::-webkit-scrollbar-thumb { background:var(--rose); border-radius:9px; }
-.field {
-  width:100%;
-  border:1px solid #e7e5e4;
-  background:white;
-  border-radius:14px;
-  padding:12px 14px;
-  outline:none;
-  font-size:14px;
-  min-width:0;
-}
-.field:focus {
-  border-color:var(--rose);
-  box-shadow:0 0 0 3px #D4A3A322;
-}
-.btn {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:7px;
-  border-radius:999px;
-  padding:10px 15px;
-  font-size:12px;
-  font-weight:600;
-  transition:opacity .15s,transform .15s;
-}
-.btn:active { transform:scale(.98); }
-.btn-dark { background:var(--ink); color:var(--cream); }
-.btn-soft { background:var(--blush); color:var(--ink); }
-.btn-white { background:#fff; border:1px solid #e7e5e4; color:var(--ink); }
-.btn-danger { background:#fff1f2; color:#be123c; }
-.card {
-  background:#fff;
-  border:1px solid #e7e5e4;
-  border-radius:18px;
-  box-shadow:0 3px 12px #2c2a2908;
-}
-.small-label { display:block; font-size:11px; color:#78716c; margin-bottom:6px; }
-.note-card { cursor:pointer; transition:border-color .15s; }
-.note-card:hover { border-color:var(--rose); }
-.icon-btn {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:#fff;
-  border:1px solid #eee7e5;
-}
-.bottom-nav { padding-bottom:max(10px,env(safe-area-inset-bottom)); }
-#toast {
-  position:fixed;
-  z-index:100;
-  top:max(14px,env(safe-area-inset-top));
-  left:50%;
-  transform:translateX(-50%);
-  max-width:calc(100vw - 32px);
-  padding:11px 16px;
-  border-radius:999px;
-  background:#2c2a29;
-  color:#fff;
-  font-size:12px;
-  box-shadow:0 8px 30px #0002;
-}
-#modal-backdrop {
-  position:fixed;
-  inset:0;
-  z-index:70;
-  background:#1c191780;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-}
-.modal {
-  width:min(100%,440px);
-  max-height:85vh;
-  overflow:auto;
-  background:var(--cream);
-  border-radius:22px;
-  padding:22px;
-  box-shadow:0 20px 70px #0003;
-}
-.photo-img { width:100%; height:100%; object-fit:cover; display:block; }
-.empty {
-  padding:28px 16px;
-  text-align:center;
-  border:1px dashed #e7caca;
-  border-radius:16px;
-  color:#a8a29e;
-  font-size:13px;
-}
-@media(min-width:640px) {
-  .page { padding-top:30px!important; }
-  .main-shell { max-width:720px; }
-  .brand-title { font-size:21px; }
-}
-</style>
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 3px solid #f4b5c8;
+      outline-offset: 2px;
+    }
+
+    .hidden { display: none !important; }
+
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background:
+        radial-gradient(ellipse at top left, #ffe4ec 0, transparent 45%),
+        radial-gradient(ellipse at bottom right, #ffeeda 0, transparent 40%),
+        var(--bg);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 390px;
+      padding: 32px 24px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: rgba(255,255,255,.94);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .heart {
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: 27px; letter-spacing: -1px; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); line-height: 1.6; font-size: 14px; }
+
+    .field {
+      display: block;
+      width: 100%;
+      padding: 13px 14px;
+      margin: 12px 0;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: #fffdfd;
+      color: var(--text);
+      min-width: 0;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 16px;
+      background: var(--pink);
+      color: #603647;
+      font-weight: 650;
+      transition: transform .15s, opacity .15s;
+    }
+
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--pink-dark); color: white; }
+    .btn-light { background: var(--soft); }
+    .btn-danger { background: #fff0f0; color: var(--danger); }
+    .btn-block { width: 100%; margin-top: 8px; }
+    .btn-small { padding: 8px 11px; font-size: 13px; }
+
+    .login-error {
+      color: var(--danger);
+      font-size: 13px;
+      min-height: 18px;
+      margin: 8px 0;
+    }
+
+    .app { min-height: 100vh; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,248,245,.92);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px max(16px, env(safe-area-inset-left));
+    }
+
+    .topbar-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand { font-size: 17px; font-weight: 800; letter-spacing: -.5px; }
+    .brand span { color: var(--pink-dark); }
+
+    .top-actions { display: flex; gap: 8px; align-items: center; }
+
+    .layout {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 22px 16px 45px;
+      display: grid;
+      grid-template-columns: 235px minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .sidebar {
+      align-self: start;
+      position: sticky;
+      top: 83px;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      border-radius: 20px;
+      padding: 17px;
+      box-shadow: var(--shadow);
+    }
+
+    .side-label {
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      margin: 12px 0 9px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--text);
+      padding: 11px 10px;
+      margin: 2px 0;
+    }
+
+    .nav-item.active, .nav-item:hover { background: var(--soft); }
+    .folder-list { display: grid; gap: 3px; }
+    .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .content { min-width: 0; }
+    .hero {
+      padding: 22px;
+      background: linear-gradient(125deg, #ffe5ec, #fff1e6);
+      border: 1px solid #f6dbe3;
+      border-radius: 23px;
+      margin-bottom: 22px;
+    }
+
+    .hero h2 { font-size: 23px; letter-spacing: -.7px; margin-bottom: 7px; }
+    .hero p { color: #8c6878; font-size: 13px; line-height: 1.6; margin-bottom: 0; }
+
+    .timer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 17px;
+    }
+
+    .time-box {
+      min-width: 58px;
+      padding: 10px 12px;
+      text-align: center;
+      background: rgba(255,255,255,.72);
+      border-radius: 12px;
+    }
+
+    .time-number { font-size: 21px; font-weight: 800; display: block; }
+    .time-label { font-size: 10px; color: var(--muted); }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 20px 0 14px;
+    }
+
+    .section-head h2 { margin: 0; font-size: 20px; letter-spacing: -.5px; }
+    .section-head p { margin: 5px 0 0; font-size: 12px; color: var(--muted); }
+
+    .note-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .note-card {
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: white;
+      padding: 16px;
+      box-shadow: 0 5px 18px rgba(116,67,84,.04);
+      overflow-wrap: anywhere;
+    }
+
+    .note-card h3 { font-size: 16px; margin: 0 0 9px; }
+    .note-preview {
+      white-space: pre-wrap;
+      color: #806d76;
+      font-size: 13px;
+      line-height: 1.65;
+      max-height: 120px;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+    }
+
+    .note-photo {
+      display: block;
+      width: 100%;
+      max-height: 210px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 10px 0;
+      background: var(--soft);
+    }
+
+    .note-meta {
+      color: var(--muted);
+      font-size: 11px;
+      margin: 12px 0;
+    }
+
+    .card-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+    .empty {
+      padding: 36px 18px;
+      text-align: center;
+      border: 1px dashed #e9cbd5;
+      border-radius: 18px;
+      background: rgba(255,255,255,.6);
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+
+    .editor {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .editor label { display: block; font-size: 12px; font-weight: 750; margin: 13px 0 6px; }
+    .editor textarea { min-height: 180px; resize: vertical; line-height: 1.65; }
+    .editor .field { margin: 0; }
+    .editor-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+    .photo-preview {
+      max-width: 100%;
+      max-height: 250px;
+      display: block;
+      margin-top: 10px;
+      border-radius: 12px;
+    }
+
+    .notice {
+      margin: 0 0 16px;
+      padding: 10px 13px;
+      border-radius: 12px;
+      background: #fff0f4;
+      color: #8d4b64;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .guest-banner {
+      padding: 10px 14px;
+      background: #fff1d9;
+      color: #7c5b2e;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .footer {
+      text-align: center;
+      color: #b19ca5;
+      font-size: 11px;
+      padding: 10px 15px 30px;
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      z-index: 20;
+      background: #503541;
+      color: white;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 13px;
+      max-width: calc(100% - 30px);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    @media (max-width: 680px) {
+      .layout { grid-template-columns: 1fr; gap: 17px; padding: 15px 13px 35px; }
+      .sidebar { position: static; padding: 12px; }
+      .sidebar-main { display: flex; flex-wrap: wrap; gap: 5px; }
+      .sidebar-main .nav-item { width: auto; flex: 1; justify-content: center; }
+      .side-label { margin-top: 8px; }
+      .folder-list { display: flex; flex-wrap: wrap; }
+      .folder-list .nav-item { width: auto; max-width: 100%; }
+      .note-grid { grid-template-columns: 1fr; }
+      .topbar { padding-top: max(12px, env(safe-area-inset-top)); }
+      .top-actions .btn { padding: 9px 10px; font-size: 12px; }
+      .brand { font-size: 15px; }
+      .hero { padding: 18px; }
+      .hero h2 { font-size: 21px; }
+      .section-head h2 { font-size: 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
 </head>
 
 <body>
-<div id="app" class="min-h-screen">
-  <main style="max-width:560px;margin:12vh auto;padding:24px;font-family:system-ui;color:#2c2a29">
-    <h1>notes for me &amp; rhy</h1>
-    <p>Loading your little corner of the internet…</p>
-    <p>If this message stays here, check your internet connection and browser console.</p>
-  </main>
-</div>
-<div id="toast" hidden></div>
-<div id="modal-root"></div>
+  <section id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="heart">♡</div>
+      <h1>notes for me & rhy</h1>
+      <p class="subtitle">a little home for our thoughts, memories, and words we want to keep.</p>
 
-<script>
-(() => {
-'use strict';
+      <form id="loginForm">
+        <input class="field" id="username" autocomplete="username"
+          placeholder="your username" required>
+        <input class="field" id="password" type="password"
+          autocomplete="current-password" placeholder="your password" required>
+        <p id="loginError" class="login-error"></p>
+        <button class="btn btn-primary btn-block" type="submit">open our space ♡</button>
+      </form>
 
-const $ = (selector, root=document) => root.querySelector(selector);
-const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
-
-const uid = () => 'id-' + (
-  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2) + Date.now()
-);
-
-function safeSessionGet(key) {
-  try { return window.sessionStorage.getItem(key); }
-  catch (error) { console.warn('Session storage unavailable:', error); return null; }
-}
-function safeSessionSet(key, value) {
-  try { window.sessionStorage.setItem(key, value); }
-  catch (error) { console.warn('Session storage unavailable:', error); }
-}
-function safeSessionRemove(key) {
-  try { window.sessionStorage.removeItem(key); }
-  catch (error) { console.warn('Session storage unavailable:', error); }
-}
-function esc(value) {
-  return String(value ?? '').replace(/[&<>"']/g, character => ({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[character]));
-}
-function dateLabel(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? ''
-    : date.toLocaleDateString(undefined,{
-        month:'short',
-        day:'numeric',
-        year:'numeric'
-      });
-}
-
-/*
-  Firebase configuration for your existing project.
-  Firebase client configuration is not a substitute for database security rules.
-*/
-const CONFIG = {
-  apiKey: "AIzaSyDi1QnBd-rPnhbPF75iXd8u99FGKJLkV7Y",
-  authDomain: "notes-for-me-and-rhy.firebaseapp.com",
-  projectId: "notes-for-me-and-rhy",
-  storageBucket: "notes-for-me-and-rhy.firebasestorage.app",
-  messagingSenderId: "356957167276",
-  appId: "1:356957167276:web:ea399abac3ee4493b2c909",
-  measurementId: "G-0QK1QQ6SX4"
-};
-
-const SAMPLE_NOTES = [
-  {
-    id:'note-1',
-    title:'little moments in leyte',
-    content:'today was quiet and peaceful. the afternoon sun felt warm against the glass, and listening to your voice note made the whole day feel lighter. notes for me & rhy is our little corner of the internet to keep these small memories safe.',
-    folderId:'folder-memories',
-    tags:['memories','thoughts'],
-    published:true,
-    author:'Ronan',
-    createdAt:'2025-05-21T08:00:00.000Z',
-    updatedAt:'2025-05-21T08:00:00.000Z',
-    images:[]
-  },
-  {
-    id:'note-2',
-    title:'a letter for tomorrow',
-    content:'just wanted to remind you how much every single conversation means to me. no matter how busy things get with college and everything else, this place is always here for us.',
-    folderId:'folder-letters',
-    tags:['letters'],
-    published:true,
-    author:'Rhy',
-    createdAt:'2025-05-22T08:00:00.000Z',
-    updatedAt:'2025-05-22T08:00:00.000Z',
-    images:[]
-  }
-];
-
-const SAMPLE_FOLDERS = [
-  {
-    id:'folder-memories',
-    name:'memories',
-    description:'our everyday moments',
-    color:'#D4A3A3',
-    visibility:'public'
-  },
-  {
-    id:'folder-letters',
-    name:'letters',
-    description:'notes written just for us',
-    color:'#EAE6F8',
-    visibility:'shared'
-  },
-  {
-    id:'folder-photos',
-    name:'our pictures',
-    description:'snapshots and memories',
-    color:'#F7EBE8',
-    visibility:'public'
-  }
-];
-
-let db = null;
-let storage = null;
-let cloudError = '';
-
-try {
-  if (typeof firebase !== 'undefined') {
-    if (!firebase.apps.length) firebase.initializeApp(CONFIG);
-    db = firebase.firestore();
-
-    try {
-      storage = firebase.storage();
-    } catch (error) {
-      console.warn('Firebase Storage unavailable:', error);
-    }
-  } else {
-    cloudError = 'Firebase did not load. The app will use local preview mode.';
-  }
-} catch (error) {
-  console.error('Firebase initialization failed:', error);
-  cloudError = 'Firebase could not initialize. Running in this browser only.';
-}
-
-const state = {
-  user:safeSessionGet('notes_user') || null,
-  view:'home',
-  notes:[],
-  folders:[],
-  photos:[],
-  search:'',
-  activeNoteId:null,
-  activeFolderId:null,
-  busy:false,
-  unsubs:[],
-  toastTimer:null
-};
-
-function toast(message) {
-  const element = $('#toast');
-  if (!element) return;
-  element.textContent = message;
-  element.hidden = false;
-  clearTimeout(state.toastTimer);
-  state.toastTimer = setTimeout(() => element.hidden = true, 3200);
-}
-
-function icon(name, size=17) {
-  return `<i data-lucide="${esc(name)}" width="${size}" height="${size}" aria-hidden="true"></i>`;
-}
-function refreshIcons() {
-  try {
-    if (window.lucide) window.lucide.createIcons();
-  } catch (error) {
-    console.warn('Icons unavailable:', error);
-  }
-}
-
-function persistLocal() {
-  try {
-    localStorage.setItem('notes_local_notes', JSON.stringify(state.notes));
-    localStorage.setItem('notes_local_folders', JSON.stringify(state.folders));
-    localStorage.setItem('notes_local_photos', JSON.stringify(state.photos));
-  } catch (error) {
-    console.warn('Local cache could not be saved:', error);
-  }
-}
-
-function loadLocal() {
-  try {
-    state.notes = JSON.parse(localStorage.getItem('notes_local_notes') || 'null')
-      || SAMPLE_NOTES.map(note => ({...note}));
-    state.folders = JSON.parse(localStorage.getItem('notes_local_folders') || 'null')
-      || SAMPLE_FOLDERS.map(folder => ({...folder}));
-    state.photos = JSON.parse(localStorage.getItem('notes_local_photos') || '[]') || [];
-  } catch (error) {
-    console.warn('Local data unavailable:', error);
-    state.notes = SAMPLE_NOTES.map(note => ({...note}));
-    state.folders = SAMPLE_FOLDERS.map(folder => ({...folder}));
-    state.photos = [];
-  }
-}
-
-function isAdmin() {
-  return state.user === 'Ronan' || state.user === 'Rhy';
-}
-function visibleNotes() {
-  return state.notes.filter(note => isAdmin() || note.published === true);
-}
-function getFolder(id) {
-  return state.folders.find(folder => folder.id === id);
-}
-
-function anniversary() {
-  const start = new Date(2025, 4, 19, 0, 0, 0);
-  const now = new Date();
-  const elapsed = Math.max(0, Math.floor((now - start) / 86400000));
-  let next = new Date(now.getFullYear(), 4, 19);
-
-  if (next < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
-    next = new Date(now.getFullYear() + 1, 4, 19);
-  }
-
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const nextDay = new Date(next.getFullYear(), next.getMonth(), next.getDate());
-  const days = Math.ceil((nextDay - today) / 86400000);
-
-  return {elapsed, days, nextYear:next.getFullYear()};
-}
-
-function loginScreen() {
-  $('#app').innerHTML = `
-    <main class="min-h-screen flex items-center justify-center p-5 safe-top safe-bottom">
-      <section class="card w-full max-w-md p-6 sm:p-8 text-center space-y-6">
-        <div class="mx-auto w-14 h-14 rounded-2xl bg-warmBlush flex items-center justify-center text-rose-400">
-          ${icon('book-heart',26)}
-        </div>
-        <div>
-          <h1 class="serif text-3xl mb-2">notes for me &amp; rhy</h1>
-          <p class="text-xs text-stone-500">a little place for our thoughts and memories</p>
-        </div>
-        <div id="login-profiles" class="grid grid-cols-2 gap-3">
-          <button class="profile-btn p-4 rounded-2xl border border-stone-200 bg-warmBlush/40 hover:border-dustyRose" data-user="Ronan">
-            <span class="block serif text-xl">Ronan</span>
-            <span class="text-[11px] text-stone-500">your space</span>
-          </button>
-          <button class="profile-btn p-4 rounded-2xl border border-stone-200 bg-warmBlush/40 hover:border-dustyRose" data-user="Rhy">
-            <span class="block serif text-xl">Rhy</span>
-            <span class="text-[11px] text-stone-500">your space</span>
-          </button>
-        </div>
-        <form id="login-form" class="hidden text-left space-y-3">
-          <p class="text-center text-sm text-stone-600">
-            Logging in as <strong id="chosen-user" class="text-rose-500"></strong>
-          </p>
-          <label class="small-label" for="password">Password</label>
-          <input id="password" class="field text-center" type="password" autocomplete="current-password" placeholder="enter password" required>
-          <p id="login-error" class="text-xs text-rose-500 text-center" role="alert"></p>
-          <div class="flex gap-2">
-            <button id="login-back" type="button" class="btn btn-white flex-1">back</button>
-            <button class="btn btn-dark flex-1" type="submit">login</button>
-          </div>
-        </form>
-        <button id="guest-btn" class="btn btn-white w-full py-3">
-          ${icon('eye',16)} continue as guest
-        </button>
-        <p class="text-[10px] text-stone-400 leading-relaxed">
-          Guest mode is read-only. Use your profile to edit this journal.
-        </p>
-      </section>
-    </main>`;
-
-  let chosen = null;
-
-  $$('.profile-btn').forEach(button => {
-    button.addEventListener('click', () => {
-      chosen = button.dataset.user;
-      $('#chosen-user').textContent = chosen;
-      $('#login-profiles').classList.add('hidden');
-      $('#guest-btn').classList.add('hidden');
-      $('#login-form').classList.remove('hidden');
-      $('#password').focus();
-    });
-  });
-
-  $('#login-back').addEventListener('click', () => {
-    $('#login-form').classList.add('hidden');
-    $('#login-profiles').classList.remove('hidden');
-    $('#guest-btn').classList.remove('hidden');
-    $('#password').value = '';
-    $('#login-error').textContent = '';
-    chosen = null;
-  });
-
-  $('#login-form').addEventListener('submit', event => {
-    event.preventDefault();
-
-    if ($('#password').value === 'Admin123' && chosen) {
-      state.user = chosen;
-      safeSessionSet('notes_user', chosen);
-      render();
-    } else {
-      $('#login-error').textContent = 'Incorrect password. Please try again.';
-    }
-  });
-
-  $('#guest-btn').addEventListener('click', () => {
-    state.user = 'guest';
-    safeSessionSet('notes_user', 'guest');
-    render();
-  });
-
-  refreshIcons();
-}
-
-function navButton(iconName, view, label) {
-  return `
-    <button data-action="${view}" class="flex min-w-[56px] flex-col items-center gap-1 py-1 text-xs ${state.view === view ? 'text-charcoal font-semibold' : 'text-stone-400'}">
-      ${icon(iconName,20)}
-      <span>${label}</span>
-    </button>`;
-}
-
-function shell(content) {
-  const admin = isAdmin();
-
-  $('#app').innerHTML = `
-    <div class="min-h-screen flex flex-col">
-      <header class="safe-top sticky top-0 z-40 bg-cream/90 backdrop-blur-md border-b border-warmBlush">
-        <div class="main-shell max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <button data-action="home" class="text-left min-w-0">
-            <h1 class="serif brand-title text-lg tracking-tight">notes for me &amp; rhy</h1>
-            <p class="text-[11px] text-stone-500">digital journal &amp; memories</p>
-          </button>
-          <div class="flex items-center gap-2 shrink-0">
-            <span class="text-[11px] px-3 py-1.5 rounded-full bg-warmBlush">${admin ? '✨ ' + esc(state.user) : '👀 guest'}</span>
-            <button data-action="logout" class="text-xs text-stone-500 underline">logout</button>
-          </div>
-        </div>
-      </header>
-      <main class="main-shell page flex-1 w-full max-w-3xl mx-auto px-4 py-6 pb-28">
-        ${content}
-      </main>
-      <nav class="bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-cream/95 backdrop-blur-md border-t border-warmBlush px-3 pt-3">
-        <div class="max-w-md mx-auto flex items-center justify-around gap-1">
-          ${navButton('home','home','home')}
-          ${navButton('book-open','notes','notes')}
-          ${admin ? `<button data-action="new-note" class="flex flex-col items-center justify-center gap-1 -mt-5 w-12 h-12 rounded-full bg-charcoal text-cream shadow-lg">${icon('plus',22)}<span class="sr-only">new note</span></button>` : ''}
-          ${navButton('image','photos','photos')}
-          ${admin ? navButton('folder-plus','folders','folders') : ''}
-        </div>
-      </nav>
-    </div>`;
-
-  if (cloudError) {
-    $('main').insertAdjacentHTML('afterbegin', `
-      <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-        ${icon('alert-triangle',15)} ${esc(cloudError)}
-      </div>`);
-  }
-
-  $$('[data-action]').forEach(button => {
-    button.addEventListener('click', () => action(button.dataset.action));
-  });
-
-  refreshIcons();
-}
-
-function homeView() {
-  const admin = isAdmin();
-  const notes = visibleNotes().slice().sort((a,b) =>
-    new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
-  );
-  const anniversaryInfo = anniversary();
-
-  return `
-    <div class="space-y-8">
-      <section class="text-center py-7 px-4 rounded-3xl bg-warmBlush/50 border border-warmBlush space-y-3">
-        <div class="text-rose-400 flex justify-center">${icon('heart',21)}</div>
-        <h2 class="serif text-3xl font-normal">notes for me &amp; rhy</h2>
-        <p class="text-xs text-rose-500 font-medium tracking-wide">
-          ✨ together since may 19, 2025 · ${anniversaryInfo.elapsed} days ✨
-        </p>
-        <p class="text-xs text-stone-500">
-          ${anniversaryInfo.days === 0 ? 'happy anniversary!' : `${anniversaryInfo.days} days until may 19, ${anniversaryInfo.nextYear}`}
-        </p>
-        <p class="text-sm text-stone-600 max-w-md mx-auto font-light leading-relaxed">
-          a quiet space for our thoughts, letters, photos, and memories.
-        </p>
-        ${admin ? `
-          <div class="pt-2 flex justify-center flex-wrap gap-2">
-            <button data-action="new-note" class="btn btn-dark">${icon('pen-line',15)} write a note</button>
-            <button data-action="new-folder" class="btn btn-white">${icon('folder-plus',15)} new folder</button>
-          </div>` : ''}
-      </section>
-
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="serif text-xl">our folders</h3>
-          <span class="text-xs text-stone-400">${state.folders.length} folders</span>
-        </div>
-        ${state.folders.length
-          ? `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${state.folders.map(folderCard).join('')}</div>`
-          : '<div class="empty">No folders yet.</div>'}
-      </section>
-
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="serif text-xl">recent notes</h3>
-          <button data-action="notes" class="text-xs text-stone-500 underline">view all</button>
-        </div>
-        ${notes.length
-          ? `<div class="space-y-3">${notes.slice(0,3).map(noteCard).join('')}</div>`
-          : `<div class="empty">No notes yet. ${admin ? 'Write your first note when you are ready.' : 'Published notes will appear here.'}</div>`}
-      </section>
-
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="serif text-xl">photo memories</h3>
-          <button data-action="photos" class="text-xs text-stone-500 underline">view gallery</button>
-        </div>
-        ${state.photos.length
-          ? `<div class="grid grid-cols-3 gap-2">${state.photos.slice(0,3).map(photo => `
-              <button class="aspect-square overflow-hidden rounded-xl bg-stone-100" data-photo="${esc(photo.id)}">
-                <img class="photo-img" src="${esc(photo.url)}" alt="${esc(photo.caption || 'memory')}">
-              </button>`).join('')}</div>`
-          : '<p class="text-sm text-stone-400 italic">No photos uploaded yet.</p>'}
-      </section>
-    </div>`;
-}
-
-function folderCard(folder) {
-  const count = state.notes.filter(note =>
-    note.folderId === folder.id && (isAdmin() || note.published)
-  ).length;
-
-  return `
-    <button data-folder="${esc(folder.id)}" class="card p-4 text-left hover:border-dustyRose transition-colors min-w-0">
-      <div class="flex items-center justify-between mb-3">
-        <span style="color:${esc(folder.color || '#D4A3A3')}">${icon('folder',21)}</span>
-        <span class="text-[9px] uppercase tracking-wider px-2 py-1 rounded-full bg-stone-100 text-stone-500">${esc(folder.visibility || 'shared')}</span>
-      </div>
-      <h4 class="serif text-base break-words">${esc(folder.name)}</h4>
-      <p class="text-[11px] text-stone-500 mt-1">${esc(folder.description || `${count} notes`)}</p>
-    </button>`;
-}
-
-function noteCard(note) {
-  const folder = getFolder(note.folderId);
-
-  return `
-    <button data-note="${esc(note.id)}" class="card note-card w-full p-4 text-left">
-      <div class="flex items-center justify-between gap-2 text-[11px] text-stone-400 mb-2">
-        <span>${esc(dateLabel(note.updatedAt || note.createdAt))}${note.author ? ' · by ' + esc(note.author) : ''}</span>
-        ${!note.published ? '<span class="rounded bg-amber-100 text-amber-800 px-2 py-0.5">draft</span>' : ''}
-      </div>
-      <h4 class="serif text-xl mb-1 break-words">${esc(note.title || 'untitled')}</h4>
-      <p class="text-sm text-stone-600 font-light leading-relaxed whitespace-pre-wrap">${esc(note.content || '').slice(0,250)}</p>
-      ${folder ? `<p class="mt-3 text-[11px] text-rose-400">${icon('folder',12)} ${esc(folder.name)}</p>` : ''}
-    </button>`;
-}
-
-function notesView() {
-  const query = state.search.toLowerCase();
-  const list = visibleNotes().filter(note =>
-    (note.title || '').toLowerCase().includes(query) ||
-    (note.content || '').toLowerCase().includes(query)
-  ).sort((a,b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
-
-  return `
-    <div class="space-y-4">
-      <div class="flex items-center justify-between gap-3">
-        <button data-action="home" class="text-xs text-stone-500 flex items-center gap-1">${icon('arrow-left',15)} home</button>
-        <h2 class="serif text-2xl">all notes</h2>
-        ${isAdmin() ? '<button data-action="new-note" class="btn btn-dark">new note</button>' : '<span></span>'}
-      </div>
-      <div class="relative">
-        <input id="search" class="field mt-2" placeholder="search notes..." value="${esc(state.search)}">
-      </div>
-      <div id="note-results" class="space-y-3">
-        ${list.length ? list.map(noteCard).join('') : '<div class="empty">No notes match your search.</div>'}
-      </div>
-    </div>`;
-}
-
-function noteDetailView() {
-  const note = state.notes.find(item => item.id === state.activeNoteId);
-  if (!note) {
-    state.view = 'notes';
-    return notesView();
-  }
-
-  const folder = getFolder(note.folderId);
-
-  return `
-    <div class="space-y-5">
-      <div class="flex items-center justify-between gap-2">
-        <button data-action="notes" class="text-xs text-stone-500 flex items-center gap-1">${icon('arrow-left',15)} all notes</button>
-        ${isAdmin() ? `
-          <div class="flex gap-2">
-            <button data-action="edit-note" class="btn btn-white">edit</button>
-            <button data-action="delete-note" class="btn btn-danger">delete</button>
-          </div>` : ''}
-      </div>
-      <article class="card p-5 sm:p-7 space-y-4">
-        <div class="flex justify-between gap-3 text-[11px] text-stone-400 border-b border-stone-100 pb-3">
-          <span>${esc(dateLabel(note.createdAt))}${note.author ? ' · written by ' + esc(note.author) : ''}</span>
-          ${folder ? `<span class="text-rose-400">${esc(folder.name)}</span>` : ''}
-        </div>
-        <h2 class="serif text-3xl leading-tight break-words">${esc(note.title || 'untitled')}</h2>
-        <div class="text-stone-700 font-light leading-8 whitespace-pre-wrap break-words">${esc(note.content || '')}</div>
-        ${note.images?.length ? `
-          <div class="grid grid-cols-2 gap-2 pt-2">
-            ${note.images.map(url => `<img src="${esc(url)}" alt="note attachment" class="w-full rounded-xl border border-stone-200 object-cover max-h-72">`).join('')}
-          </div>` : ''}
-      </article>
-    </div>`;
-}
-
-function editorView() {
-  const note = state.notes.find(item => item.id === state.activeNoteId);
-  const editing = !!note;
-
-  return `
-    <form id="note-editor" class="space-y-5">
-      <div class="flex items-center justify-between gap-2">
-        <button type="button" data-action="cancel-editor" class="text-xs text-stone-500">cancel</button>
-        <h2 class="serif text-xl">${editing ? 'edit note' : 'new note'}</h2>
-        <button type="submit" class="btn btn-dark" id="save-note">save note</button>
-      </div>
-      <input name="title" class="field serif text-xl" placeholder="note title..." value="${esc(note?.title || '')}" maxlength="180">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <label>
-          <span class="small-label">folder</span>
-          <select name="folderId" class="field">
-            <option value="">unfiled</option>
-            ${state.folders.map(folder => `<option value="${esc(folder.id)}" ${note?.folderId === folder.id ? 'selected' : ''}>${esc(folder.name)}</option>`).join('')}
-          </select>
-        </label>
-        <label>
-          <span class="small-label">status</span>
-          <select name="published" class="field">
-            <option value="true" ${note?.published !== false ? 'selected' : ''}>published</option>
-            <option value="false" ${note?.published === false ? 'selected' : ''}>draft</option>
-          </select>
-        </label>
-      </div>
-      <textarea name="content" rows="11" class="field leading-7" placeholder="write your thoughts here...">${esc(note?.content || '')}</textarea>
-      <div class="card p-4 space-y-3">
-        <div>
-          <h3 class="serif text-lg">photo attachments</h3>
-          <p class="text-xs text-stone-500">Images upload to Firebase Storage when configured.</p>
-        </div>
-        <input id="note-images" type="file" accept="image/*" multiple class="block w-full text-xs text-stone-500">
-        <div id="note-image-preview" class="grid grid-cols-3 gap-2">
-          ${(note?.images || []).map((url,index) => `
-            <div class="relative aspect-square rounded-lg overflow-hidden">
-              <img src="${esc(url)}" class="photo-img" alt="attachment">
-              <button type="button" data-remove-image="${index}" class="absolute top-1 right-1 rounded-full bg-black/70 text-white w-6 h-6">×</button>
-            </div>`).join('')}
-        </div>
-        <p class="text-[11px] text-stone-400">Choose reasonably sized images for faster uploads.</p>
-      </div>
-    </form>`;
-}
-
-function folderDetailView() {
-  const folder = getFolder(state.activeFolderId);
-  if (!folder) {
-    state.view = 'home';
-    return homeView();
-  }
-
-  const notes = state.notes.filter(note =>
-    note.folderId === folder.id && (isAdmin() || note.published)
-  );
-  const photos = state.photos.filter(photo => photo.folderId === folder.id);
-
-  return `
-    <div class="space-y-6">
-      <div class="flex items-center justify-between gap-2">
-        <button data-action="home" class="text-xs text-stone-500 flex items-center gap-1">${icon('arrow-left',15)} home</button>
-        <h2 class="serif text-2xl text-center">${esc(folder.name)}</h2>
-        ${isAdmin() ? '<button data-action="edit-folder" class="btn btn-white">edit</button>' : ''}
-      </div>
-      ${folder.description ? `<p class="text-sm text-stone-600 bg-warmBlush/40 p-4 rounded-xl">${esc(folder.description)}</p>` : ''}
-      <section>
-        <h3 class="serif text-xl mb-3">notes in this folder</h3>
-        ${notes.length ? `<div class="space-y-3">${notes.map(noteCard).join('')}</div>` : '<div class="empty">No notes in this folder yet.</div>'}
-      </section>
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="serif text-xl">photos in this folder</h3>
-          ${isAdmin() ? '<button data-action="upload-photo" class="btn btn-soft">add photo</button>' : ''}
-        </div>
-        ${photos.length ? `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${photos.map(photoCard).join('')}</div>` : '<div class="empty">No photos in this folder yet.</div>'}
-      </section>
-    </div>`;
-}
-
-function photoCard(photo) {
-  return `
-    <div class="card p-2 space-y-2">
-      <button data-photo="${esc(photo.id)}" class="block aspect-square w-full rounded-xl overflow-hidden bg-stone-100">
-        <img class="photo-img" src="${esc(photo.url)}" alt="${esc(photo.caption || 'memory')}">
+      <button class="btn btn-light btn-block" id="guestButton" type="button">
+        continue as a guest
       </button>
-      ${photo.caption ? `<p class="px-1 text-xs text-stone-600 break-words">${esc(photo.caption)}</p>` : ''}
-      ${isAdmin() ? `<button data-delete-photo="${esc(photo.id)}" class="btn btn-danger w-full">${icon('trash-2',13)} remove</button>` : ''}
-    </div>`;
-}
 
-function photosView() {
-  return `
-    <div class="space-y-5">
-      <div class="flex items-center justify-between gap-2">
-        <button data-action="home" class="text-xs text-stone-500 flex items-center gap-1">${icon('arrow-left',15)} home</button>
-        <h2 class="serif text-2xl">photo memories</h2>
-        ${isAdmin() ? '<button data-action="upload-photo" class="btn btn-dark">upload</button>' : '<span></span>'}
+      <p class="subtitle" style="font-size:11px;margin:18px 0 0">
+        made with love, for the little things.
+      </p>
+    </div>
+  </section>
+
+  <section id="appPage" class="app hidden">
+    <div id="guestBanner" class="guest-banner hidden">
+      guest preview · you can read notes, but you cannot edit or delete them.
+    </div>
+
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">notes for me <span>&</span> rhy ♡</div>
+        <div class="top-actions">
+          <span id="userLabel" class="subtitle"></span>
+          <button class="btn btn-light btn-small" id="logoutButton">log out</button>
+        </div>
       </div>
-      ${state.photos.length
-        ? `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${state.photos.map(photoCard).join('')}</div>`
-        : '<div class="empty">Your photo memories will appear here.</div>'}
-    </div>`;
-}
+    </header>
 
-function foldersView() {
-  return `
-    <div class="space-y-4">
-      <div class="flex items-center justify-between">
-        <button data-action="home" class="text-xs text-stone-500 flex items-center gap-1">${icon('arrow-left',15)} home</button>
-        <h2 class="serif text-2xl">your folders</h2>
-        <button data-action="new-folder" class="btn btn-dark">new folder</button>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${state.folders.map(folderCard).join('')}</div>
-    </div>`;
-}
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-label">your space</div>
+        <div class="sidebar-main">
+          <button class="nav-item active" data-view="all">♡ all notes</button>
+          <button class="nav-item" data-view="favorites">♥ favorites</button>
+        </div>
 
-function render() {
-  if (!state.user) {
-    loginScreen();
-    return;
-  }
+        <div class="side-label">your folders</div>
+        <div id="folderList" class="folder-list"></div>
 
-  let content = '';
-  switch (state.view) {
-    case 'home': content = homeView(); break;
-    case 'notes': content = notesView(); break;
-    case 'note-detail': content = noteDetailView(); break;
-    case 'editor': content = editorView(); break;
-    case 'folder-detail': content = folderDetailView(); break;
-    case 'photos': content = photosView(); break;
-    case 'folders': content = foldersView(); break;
-    default:
-      state.view = 'home';
-      content = homeView();
-  }
-  shell(content);
-}
+        <button class="btn btn-light btn-block" id="addFolderButton">＋ create a folder</button>
+        <button class="btn btn-primary btn-block" id="newNoteButton">＋ write a note</button>
+      </aside>
 
-async function writeDoc(collection, item) {
-  if (db) {
-    await db.collection(collection).doc(item.id).set(item);
-    return;
-  }
+      <main class="content">
+        <section class="hero">
+          <h2>our little forever ♡</h2>
+          <p>another day of keeping memories with you. no matter how ordinary a moment feels, it can still become something worth remembering.</p>
+          <div class="timer" aria-label="Time until our next anniversary">
+            <div class="time-box"><span class="time-number" id="days">—</span><span class="time-label">days</span></div>
+            <div class="time-box"><span class="time-number" id="hours">—</span><span class="time-label">hours</span></div>
+            <div class="time-box"><span class="time-number" id="minutes">—</span><span class="time-label">minutes</span></div>
+            <div class="time-box"><span class="time-number" id="seconds">—</span><span class="time-label">seconds</span></div>
+          </div>
+          <p id="anniversaryCaption" style="margin-top:12px"></p>
+        </section>
 
-  const array = collection === 'notes' ? state.notes
-    : collection === 'folders' ? state.folders
-    : state.photos;
-  const index = array.findIndex(entry => entry.id === item.id);
-  if (index >= 0) array[index] = item;
-  else array.unshift(item);
-  persistLocal();
-}
+        <div id="statusNotice" class="notice">
+          Loading your notes…
+        </div>
 
-async function deleteDoc(collection, id) {
-  if (db) {
-    await db.collection(collection).doc(id).delete();
-    return;
-  }
+        <section id="editor" class="editor hidden">
+          <h2 id="editorHeading" style="margin-bottom:4px">a new little thought ♡</h2>
+          <p class="subtitle">write whatever your heart wants to keep.</p>
 
-  const array = collection === 'notes' ? state.notes
-    : collection === 'folders' ? state.folders
-    : state.photos;
-  const index = array.findIndex(entry => entry.id === id);
-  if (index >= 0) array.splice(index, 1);
-  persistLocal();
-}
+          <form id="noteForm">
+            <label for="noteTitle">title</label>
+            <input id="noteTitle" class="field" maxlength="150"
+              placeholder="give this memory a name…" required>
 
-function action(name) {
-  if (name === 'logout') {
-    state.user = null;
-    safeSessionRemove('notes_user');
-    state.view = 'home';
-    render();
-    return;
-  }
+            <label for="noteFolder">folder</label>
+            <select id="noteFolder" class="field"></select>
 
-  if (['home','notes','photos','folders'].includes(name)) {
-    state.view = name;
-    render();
-    return;
-  }
+            <label for="noteBody">your note</label>
+            <textarea id="noteBody" class="field"
+              placeholder="dear diary, dear us…" required></textarea>
 
-  if (name === 'new-note') {
-    if (!isAdmin()) return toast('Log in to create notes.');
-    state.activeNoteId = null;
-    state.view = 'editor';
-    render();
-    return;
-  }
+            <label for="notePhoto">add a photo (optional)</label>
+            <input id="notePhoto" class="field" type="file"
+              accept="image/*">
+            <img id="photoPreview" class="photo-preview hidden" alt="Selected photo preview">
 
-  if (name === 'edit-note') {
-    if (!isAdmin()) return;
-    state.view = 'editor';
-    render();
-    return;
-  }
+            <div class="editor-actions">
+              <button class="btn btn-primary" type="submit" id="saveNoteButton">save note ♡</button>
+              <button class="btn btn-light" type="button" id="cancelEditorButton">cancel</button>
+            </div>
+          </form>
+        </section>
 
-  if (name === 'cancel-editor') {
-    state.view = state.activeNoteId ? 'note-detail' : 'home';
-    render();
-    return;
-  }
+        <div class="section-head">
+          <div>
+            <h2 id="listHeading">all our notes</h2>
+            <p id="noteCount">little thoughts we want to keep.</p>
+          </div>
+          <button class="btn btn-light btn-small" id="refreshButton">refresh</button>
+        </div>
 
-  if (name === 'new-folder') {
-    if (!isAdmin()) return toast('Log in to create folders.');
-    folderModal();
-    return;
-  }
+        <div id="noteGrid" class="note-grid"></div>
+      </main>
+    </div>
 
-  if (name === 'edit-folder') {
-    if (!isAdmin()) return;
-    folderModal(getFolder(state.activeFolderId));
-    return;
-  }
+    <footer class="footer">a small collection of us, one note at a time ♡</footer>
+  </section>
 
-  if (name === 'delete-note') {
-    deleteActiveNote();
-    return;
-  }
+  <div id="toast" class="hidden" role="status" aria-live="polite"></div>
 
-  if (name === 'upload-photo') {
-    if (!isAdmin()) return toast('Log in to upload photos.');
-    photoModal();
-  }
-}
+  <script type="module">
+    // ==========================================================
+    // NEW FIREBASE MODULAR SDK ONLY. NO COMPAT SDK.
+    // ==========================================================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+    import {
+      getFirestore, collection, doc, addDoc, updateDoc,
+      deleteDoc, onSnapshot, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    import {
+      getStorage, ref, uploadBytes, getDownloadURL, deleteObject
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
-async function deleteActiveNote() {
-  const note = state.notes.find(item => item.id === state.activeNoteId);
-  if (!note) return;
-  if (!confirm(`Delete "${note.title || 'untitled'}"? This cannot be undone.`)) return;
-
-  try {
-    await deleteDoc('notes', note.id);
-    state.activeNoteId = null;
-    state.view = 'notes';
-    toast('Note deleted.');
-    render();
-  } catch (error) {
-    console.error(error);
-    toast('Could not delete note. Check Firestore rules.');
-  }
-}
-
-function modal(content) {
-  $('#modal-root').innerHTML = `<div id="modal-backdrop"><section class="modal">${content}</section></div>`;
-  $('#modal-backdrop').addEventListener('click', event => {
-    if (event.target.id === 'modal-backdrop') closeModal();
-  });
-  refreshIcons();
-}
-
-function closeModal() {
-  $('#modal-root').innerHTML = '';
-}
-
-function folderModal(folder=null) {
-  const f = folder || {
-    name:'',
-    description:'',
-    visibility:'public',
-    color:'#F7EBE8'
-  };
-
-  modal(`
-    <form id="folder-form" class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="serif text-2xl">${folder ? 'edit folder' : 'new folder'}</h2>
-        <button type="button" id="close-modal" class="icon-btn" aria-label="Close">${icon('x')}</button>
-      </div>
-      <label>
-        <span class="small-label">folder name</span>
-        <input name="name" class="field" required maxlength="70" value="${esc(f.name)}" placeholder="e.g. little moments">
-      </label>
-      <label>
-        <span class="small-label">description (optional)</span>
-        <textarea name="description" class="field" rows="3" maxlength="220" placeholder="what belongs here?">${esc(f.description || '')}</textarea>
-      </label>
-      <label>
-        <span class="small-label">visibility label</span>
-        <select name="visibility" class="field">
-          <option value="public" ${f.visibility === 'public' ? 'selected' : ''}>public</option>
-          <option value="shared" ${f.visibility === 'shared' ? 'selected' : ''}>shared</option>
-          <option value="private" ${f.visibility === 'private' ? 'selected' : ''}>private</option>
-        </select>
-        <p class="text-[11px] text-stone-400 mt-1">Privacy must be enforced by database rules.</p>
-      </label>
-      <div class="flex gap-2">
-        <button type="button" id="cancel-modal" class="btn btn-white flex-1">cancel</button>
-        <button type="submit" class="btn btn-dark flex-1">save folder</button>
-      </div>
-      ${folder ? '<button type="button" id="delete-folder" class="btn btn-danger w-full">delete folder</button>' : ''}
-    </form>`);
-
-  $('#close-modal').onclick = $('#cancel-modal').onclick = closeModal;
-
-  $('#folder-form').onsubmit = async event => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const name = String(formData.get('name') || '').trim();
-    if (!name) return;
-
-    const item = {
-      id:folder?.id || uid(),
-      name,
-      description:String(formData.get('description') || '').trim(),
-      visibility:String(formData.get('visibility') || 'shared'),
-      color:f.color || '#F7EBE8'
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoLVIagQV2nAoAqayU8UrkGGfWy7pQJbI",
+      authDomain: "notes-8271f.firebaseapp.com",
+      projectId: "notes-8271f",
+      storageBucket: "notes-8271f.firebasestorage.app",
+      messagingSenderId: "539408159614",
+      appId: "1:539408159614:web:7d8076a1e840c70aa4592f",
+      measurementId: "G-JVGBL30B1V"
     };
 
-    try {
-      await writeDoc('folders', item);
-      closeModal();
-      state.activeFolderId = item.id;
-      toast('Folder saved.');
-      render();
-    } catch (error) {
-      console.error(error);
-      toast('Could not save folder. Check Firestore rules.');
-    }
-  };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
-  if (folder) {
-    $('#delete-folder').onclick = async () => {
-      if (!confirm(`Delete folder "${folder.name}"? Notes and photos will not be deleted.`)) return;
+    isSupported()
+      .then(supported => {
+        if (supported) getAnalytics(app);
+      })
+      .catch(error => console.warn("Analytics unavailable:", error));
+
+    // ==========================================================
+    // APP SETTINGS
+    // ==========================================================
+    const ANNIVERSARY_MONTH = 4; // May; JavaScript months start at 0
+    const ANNIVERSARY_DAY = 19;
+    const ANNIVERSARY_START_YEAR = 2025;
+
+    // These are frontend demo credentials, NOT secure authentication.
+    // Use Firebase Authentication before storing private information.
+    const DEMO_USERS = {
+      ronan: "Admin123",
+      rhy: "Admin123"
+    };
+
+    const NOTES_CACHE = "notes_local_notes_v2";
+    const FOLDERS_CACHE = "notes_local_folders_v2";
+
+    // Intentionally empty. No sample notes will be created or restored.
+    const SAMPLE_NOTES = [];
+    const DEFAULT_FOLDERS = [
+      { id: "memories", name: "memories", localOnly: true },
+      { id: "letters", name: "letters", localOnly: true },
+      { id: "our-pictures", name: "our pictures", localOnly: true }
+    ];
+
+    const state = {
+      user: null,
+      guest: false,
+      view: "all",
+      folderId: null,
+      notes: readCache(NOTES_CACHE, SAMPLE_NOTES),
+      folders: readCache(FOLDERS_CACHE, DEFAULT_FOLDERS),
+      editingId: null,
+      selectedPhoto: null,
+      selectedPhotoUrl: null,
+      unsubscribeNotes: null,
+      unsubscribeFolders: null,
+      cloudNotesReady: false,
+      cloudFoldersReady: false,
+      cloudNotesError: false,
+      cloudFoldersError: false
+    };
+
+    const $ = id => document.getElementById(id);
+
+    function readCache(key, fallback) {
       try {
-        await deleteDoc('folders', folder.id);
-        closeModal();
-        state.view = 'folders';
-        toast('Folder deleted.');
-        render();
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveCache() {
+      try {
+        localStorage.setItem(NOTES_CACHE, JSON.stringify(state.notes));
+        localStorage.setItem(FOLDERS_CACHE, JSON.stringify(state.folders));
+      } catch (error) {
+        console.warn("Could not save local cache:", error);
+      }
+    }
+
+    function escapeHTML(value = "") {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function toast(message) {
+      const el = $("toast");
+      el.textContent = message;
+      el.classList.remove("hidden");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => el.classList.add("hidden"), 3000);
+    }
+
+    function setNotice(message) {
+      $("statusNotice").textContent = message;
+    }
+
+    function canEdit() {
+      return Boolean(state.user) && !state.guest;
+    }
+
+    function sortNewest(items) {
+      return [...items].sort((a, b) =>
+        Number(b.updatedAt || b.createdAt || 0) -
+        Number(a.updatedAt || a.createdAt || 0)
+      );
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return "just now";
+      const date = new Date(Number(timestamp));
+      if (Number.isNaN(date.getTime())) return "just now";
+      return date.toLocaleDateString(undefined, {
+        year: "numeric", month: "short", day: "numeric"
+      });
+    }
+
+    // ==========================================================
+    // LOGIN / GUEST PREVIEW
+    // ==========================================================
+    function openApp({ user = null, guest = false }) {
+      state.user = user;
+      state.guest = guest;
+
+      $("loginPage").classList.add("hidden");
+      $("appPage").classList.remove("hidden");
+      $("guestBanner").classList.toggle("hidden", !guest);
+      $("userLabel").textContent = guest ? "guest ♡" : user;
+
+      $("newNoteButton").classList.toggle("hidden", !canEdit());
+      $("addFolderButton").classList.toggle("hidden", !canEdit());
+
+      renderFolders();
+      renderNotes();
+      startCloudListeners();
+    }
+
+    function closeApp() {
+      if (state.unsubscribeNotes) state.unsubscribeNotes();
+      if (state.unsubscribeFolders) state.unsubscribeFolders();
+
+      state.unsubscribeNotes = null;
+      state.unsubscribeFolders = null;
+      state.user = null;
+      state.guest = false;
+      state.view = "all";
+      state.folderId = null;
+      state.cloudNotesReady = false;
+      state.cloudFoldersReady = false;
+
+      $("appPage").classList.add("hidden");
+      $("loginPage").classList.remove("hidden");
+      $("password").value = "";
+      $("loginError").textContent = "";
+    }
+
+    $("loginForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const username = $("username").value.trim();
+      const password = $("password").value;
+      const key = username.toLowerCase();
+
+      if (DEMO_USERS[key] === password) {
+        $("loginError").textContent = "";
+        openApp({ user: key === "ronan" ? "Ronan" : "Rhy" });
+      } else {
+        $("loginError").textContent = "incorrect username or password. try again ♡";
+      }
+    });
+
+    $("guestButton").addEventListener("click", () => openApp({ guest: true }));
+    $("logoutButton").addEventListener("click", closeApp);
+
+    // ==========================================================
+    // FIRESTORE LIVE SYNC
+    // Empty cloud collections stay empty: no sample-note fallback.
+    // ==========================================================
+    function startCloudListeners() {
+      if (state.unsubscribeNotes) state.unsubscribeNotes();
+      if (state.unsubscribeFolders) state.unsubscribeFolders();
+
+      state.cloudNotesReady = false;
+      state.cloudFoldersReady = false;
+      setNotice("Connecting to your shared notes…");
+
+      state.unsubscribeNotes = onSnapshot(
+        collection(db, "notes"),
+        snapshot => {
+          state.notes = snapshot.docs.map(item => {
+            const data = item.data();
+            return {
+              id: item.id,
+              title: data.title || "",
+              body: data.body || "",
+              folderId: data.folderId || "",
+              photoUrl: data.photoUrl || "",
+              photoPath: data.photoPath || "",
+              favorite: Boolean(data.favorite),
+              createdAt: data.createdAt?.toMillis?.() || Number(data.createdAt) || Date.now(),
+              updatedAt: data.updatedAt?.toMillis?.() || Number(data.updatedAt) || Date.now()
+            };
+          });
+
+          state.cloudNotesReady = true;
+          saveCache();
+          renderNotes();
+          updateStatus();
+        },
+        error => {
+          console.error("Notes sync error:", error);
+          state.cloudNotesError = true;
+          state.cloudNotesReady = false;
+          renderNotes();
+          updateStatus();
+        }
+      );
+
+      state.unsubscribeFolders = onSnapshot(
+        collection(db, "folders"),
+        snapshot => {
+          state.folders = snapshot.docs.map(item => ({
+            id: item.id,
+            name: item.data().name || "untitled folder"
+          }));
+
+          state.cloudFoldersReady = true;
+          saveCache();
+          renderFolders();
+          renderNotes();
+          updateStatus();
+        },
+        error => {
+          console.error("Folder sync error:", error);
+          state.cloudFoldersError = true;
+          state.cloudFoldersReady = false;
+          renderFolders();
+          updateStatus();
+        }
+      );
+    }
+
+    function updateStatus() {
+      if (state.cloudNotesReady && state.cloudFoldersReady) {
+        setNotice("Your notes are synced with Firebase ♡");
+      } else if (state.cloudNotesError || state.cloudFoldersError) {
+        setNotice(
+          "Firebase sync is unavailable. Check your Firestore rules and connection. " +
+          "Your cached notes may still be visible on this device."
+        );
+      } else {
+        setNotice("Syncing your notes…");
+      }
+    }
+
+    // ==========================================================
+    // FOLDERS
+    // ==========================================================
+    function renderFolders() {
+      const list = $("folderList");
+      list.innerHTML = "";
+
+      if (!state.folders.length) {
+        list.innerHTML = '<p class="subtitle" style="font-size:12px">no folders yet.</p>';
+      }
+
+      state.folders.forEach(folder => {
+        const button = document.createElement("button");
+        button.className = "nav-item" +
+          (state.view === "folder" && state.folderId === folder.id ? " active" : "");
+        button.innerHTML =
+          `<span class="folder-name">♡ ${escapeHTML(folder.name)}</span>` +
+          `<span>›</span>`;
+
+        button.addEventListener("click", () => {
+          state.view = "folder";
+          state.folderId = folder.id;
+          renderFolders();
+          renderNotes();
+        });
+
+        list.appendChild(button);
+      });
+
+      document.querySelectorAll("[data-view]").forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.view === state.view && state.view !== "folder"
+        );
+      });
+
+      $("newNoteButton").classList.toggle("hidden", !canEdit());
+      $("addFolderButton").classList.toggle("hidden", !canEdit());
+    }
+
+    async function createFolder() {
+      if (!canEdit()) return;
+
+      const name = prompt("what should we call this folder?");
+      if (!name || !name.trim()) return;
+
+      try {
+        await addDoc(collection(db, "folders"), {
+          name: name.trim(),
+          createdAt: serverTimestamp()
+        });
+        toast("folder created ♡");
       } catch (error) {
         console.error(error);
-        toast('Could not delete folder.');
-      }
-    };
-  }
-}
-
-function photoModal() {
-  modal(`
-    <form id="photo-form" class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="serif text-2xl">add a memory</h2>
-        <button type="button" id="close-modal" class="icon-btn">${icon('x')}</button>
-      </div>
-      <label>
-        <span class="small-label">choose photo</span>
-        <input class="field" name="file" type="file" accept="image/*" required>
-      </label>
-      <label>
-        <span class="small-label">caption (optional)</span>
-        <input class="field" name="caption" maxlength="180" placeholder="a little memory...">
-      </label>
-      <label>
-        <span class="small-label">folder</span>
-        <select class="field" name="folderId">
-          <option value="">unfiled</option>
-          ${state.folders.map(folder => `<option value="${esc(folder.id)}" ${state.activeFolderId === folder.id ? 'selected' : ''}>${esc(folder.name)}</option>`).join('')}
-        </select>
-      </label>
-      <p class="text-[11px] text-stone-400">Uploads need Firebase Storage enabled and valid Storage rules.</p>
-      <div class="flex gap-2">
-        <button type="button" id="cancel-modal" class="btn btn-white flex-1">cancel</button>
-        <button type="submit" id="upload-submit" class="btn btn-dark flex-1">upload photo</button>
-      </div>
-      <p id="upload-error" class="text-xs text-rose-500"></p>
-    </form>`);
-
-  $('#close-modal').onclick = $('#cancel-modal').onclick = closeModal;
-
-  $('#photo-form').onsubmit = async event => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const file = formData.get('file');
-    if (!file || !file.size) return;
-
-    if (file.size > 8 * 1024 * 1024) {
-      $('#upload-error').textContent = 'Please choose an image smaller than 8 MB.';
-      return;
-    }
-
-    const button = $('#upload-submit');
-    button.disabled = true;
-    button.textContent = 'uploading…';
-
-    try {
-      if (!storage) throw new Error('Firebase Storage is unavailable. Enable Storage in Firebase Console.');
-
-      const id = uid();
-      const path = `photos/${id}/${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      const reference = storage.ref().child(path);
-
-      await reference.put(file, {contentType:file.type || 'image/jpeg'});
-      const url = await reference.getDownloadURL();
-
-      const photo = {
-        id,
-        url,
-        storagePath:path,
-        caption:String(formData.get('caption') || '').trim(),
-        folderId:String(formData.get('folderId') || ''),
-        createdAt:new Date().toISOString(),
-        author:state.user
-      };
-
-      await writeDoc('photos', photo);
-      closeModal();
-      toast('Photo uploaded.');
-      render();
-    } catch (error) {
-      console.error(error);
-      $('#upload-error').textContent = error.message || 'Upload failed. Check Firebase Storage rules.';
-      button.disabled = false;
-      button.textContent = 'try again';
-    }
-  };
-}
-
-async function uploadNoteImages(files, existing) {
-  const result = [...(existing || [])];
-  if (!files?.length) return result;
-
-  if (!storage) {
-    throw new Error('Firebase Storage is unavailable. Enable Storage before attaching photos.');
-  }
-
-  for (const file of files) {
-    if (!file.type.startsWith('image/')) continue;
-    if (file.size > 8 * 1024 * 1024) {
-      throw new Error(`${file.name} is larger than 8 MB.`);
-    }
-
-    const id = uid();
-    const path = `note-images/${id}/${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    const reference = storage.ref().child(path);
-    await reference.put(file, {contentType:file.type || 'image/jpeg'});
-    result.push(await reference.getDownloadURL());
-  }
-
-  return result;
-}
-
-async function saveNoteForm(form) {
-  if (state.busy) return;
-
-  state.busy = true;
-  const button = $('#save-note');
-  if (button) {
-    button.disabled = true;
-    button.textContent = 'saving…';
-  }
-
-  try {
-    const formData = new FormData(form);
-    const old = state.notes.find(item => item.id === state.activeNoteId);
-    const title = String(formData.get('title') || '').trim();
-    const content = String(formData.get('content') || '').trim();
-
-    if (!title && !content) {
-      toast('Add a title or some writing first.');
-      return;
-    }
-
-    const files = [...($('#note-images')?.files || [])];
-    const images = await uploadNoteImages(files, old?.images || []);
-
-    const item = {
-      id:old?.id || uid(),
-      title,
-      content,
-      folderId:String(formData.get('folderId') || ''),
-      published:formData.get('published') === 'true',
-      images,
-      author:old?.author || state.user,
-      createdAt:old?.createdAt || new Date().toISOString(),
-      updatedAt:new Date().toISOString()
-    };
-
-    await writeDoc('notes', item);
-    state.activeNoteId = item.id;
-    state.view = 'note-detail';
-    toast('Note saved successfully.');
-    render();
-  } catch (error) {
-    console.error(error);
-    toast(error.message || 'Could not save note. Check Firebase rules.');
-  } finally {
-    state.busy = false;
-  }
-}
-
-function openPhoto(id) {
-  const photo = state.photos.find(item => item.id === id);
-  if (!photo) return;
-
-  modal(`
-    <div class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="serif text-xl">${esc(photo.caption || 'memory')}</h2>
-        <button id="close-modal" class="icon-btn">${icon('x')}</button>
-      </div>
-      <img src="${esc(photo.url)}" alt="${esc(photo.caption || 'memory')}" class="w-full max-h-[65vh] object-contain rounded-xl bg-stone-100">
-      <p class="text-xs text-stone-500">${esc(dateLabel(photo.createdAt))}</p>
-    </div>`);
-
-  $('#close-modal').onclick = closeModal;
-}
-
-async function deletePhoto(id) {
-  const photo = state.photos.find(item => item.id === id);
-  if (!photo) return;
-  if (!confirm('Remove this photo?')) return;
-
-  try {
-    await deleteDoc('photos', id);
-    if (storage && photo.storagePath) {
-      try {
-        await storage.ref().child(photo.storagePath).delete();
-      } catch (error) {
-        console.warn('Storage file could not be deleted:', error);
+        toast("could not create folder. check Firebase permissions.");
       }
     }
-    toast('Photo removed.');
-    render();
-  } catch (error) {
-    console.error(error);
-    toast('Could not remove photo.');
-  }
-}
 
-function bindMain() {
-  $('#app').addEventListener('click', async event => {
-    const noteButton = event.target.closest('[data-note]');
-    if (noteButton) {
-      state.activeNoteId = noteButton.dataset.note;
-      state.view = 'note-detail';
-      render();
-      return;
-    }
+    $("addFolderButton").addEventListener("click", createFolder);
 
-    const folderButton = event.target.closest('[data-folder]');
-    if (folderButton) {
-      state.activeFolderId = folderButton.dataset.folder;
-      state.view = 'folder-detail';
-      render();
-      return;
-    }
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => {
+        state.view = button.dataset.view;
+        state.folderId = null;
+        renderFolders();
+        renderNotes();
+      });
+    });
 
-    const photoButton = event.target.closest('[data-photo]');
-    if (photoButton) {
-      openPhoto(photoButton.dataset.photo);
-      return;
-    }
+    // ==========================================================
+    // NOTES LIST
+    // ==========================================================
+    function getVisibleNotes() {
+      let notes = sortNewest(state.notes);
 
-    const deletePhotoButton = event.target.closest('[data-delete-photo]');
-    if (deletePhotoButton) {
-      deletePhoto(deletePhotoButton.dataset.deletePhoto);
-      return;
-    }
-
-    const removeImageButton = event.target.closest('[data-remove-image]');
-    if (removeImageButton) {
-      const note = state.notes.find(item => item.id === state.activeNoteId);
-      if (note) {
-        note.images.splice(Number(removeImageButton.dataset.removeImage), 1);
-        render();
+      if (state.view === "favorites") {
+        notes = notes.filter(note => note.favorite);
+      } else if (state.view === "folder") {
+        notes = notes.filter(note => note.folderId === state.folderId);
       }
+
+      return notes;
     }
-  });
 
-  $('#app').addEventListener('input', event => {
-    if (event.target.id !== 'search') return;
+    function renderNotes() {
+      const grid = $("noteGrid");
+      if (!grid) return;
 
-    state.search = event.target.value;
-    const query = state.search.toLowerCase();
-    const list = visibleNotes().filter(note =>
-      (note.title || '').toLowerCase().includes(query) ||
-      (note.content || '').toLowerCase().includes(query)
-    ).sort((a,b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+      const notes = getVisibleNotes();
+      const folder = state.folders.find(item => item.id === state.folderId);
 
-    const results = $('#note-results');
-    if (results) {
-      results.innerHTML = list.length
-        ? list.map(noteCard).join('')
-        : '<div class="empty">No notes match your search.</div>';
-      refreshIcons();
+      $("listHeading").textContent =
+        state.view === "favorites" ? "our favorite notes" :
+        state.view === "folder" ? (folder?.name || "folder notes") :
+        "all our notes";
+
+      $("noteCount").textContent =
+        `${notes.length} ${notes.length === 1 ? "note" : "notes"} to keep close ♡`;
+
+      grid.innerHTML = "";
+
+      if (!notes.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.innerHTML = `
+          <div style="font-size:30px;margin-bottom:8px">♡</div>
+          <strong>nothing here just yet</strong>
+          <p style="margin:8px 0 0;font-size:13px">make a little memory of your own.</p>
+        `;
+        grid.appendChild(empty);
+        return;
+      }
+
+      notes.forEach(note => {
+        const card = document.createElement("article");
+        card.className = "note-card";
+
+        const photo = note.photoUrl
+          ? `<img class="note-photo" src="${escapeHTML(note.photoUrl)}" alt="Photo attached to ${escapeHTML(note.title)}" loading="lazy">`
+          : "";
+
+        const favoriteButton = canEdit()
+          ? `<button class="btn btn-light btn-small" data-action="favorite">${note.favorite ? "♥ saved" : "♡ favorite"}</button>`
+          : "";
+
+        const editButton = canEdit()
+          ? `<button class="btn btn-light btn-small" data-action="edit">edit</button>`
+          : "";
+
+        const deleteButton = canEdit()
+          ? `<button class="btn btn-danger btn-small" data-action="delete">delete</button>`
+          : "";
+
+        card.innerHTML = `
+          <h3>${escapeHTML(note.title || "untitled note")}</h3>
+          ${photo}
+          <div class="note-preview">${escapeHTML(note.body || "")}</div>
+          <div class="note-meta">${escapeHTML(formatDate(note.updatedAt))}</div>
+          <div class="card-actions">
+            ${favoriteButton}
+            ${editButton}
+            ${deleteButton}
+          </div>
+        `;
+
+        card.querySelector('[data-action="favorite"]')?.addEventListener("click", () => toggleFavorite(note));
+        card.querySelector('[data-action="edit"]')?.addEventListener("click", () => editNote(note));
+        card.querySelector('[data-action="delete"]')?.addEventListener("click", () => deleteNote(note));
+
+        grid.appendChild(card);
+      });
     }
-  });
 
-  $('#app').addEventListener('submit', event => {
-    if (event.target.id === 'note-editor') {
+    // ==========================================================
+    // NOTE EDITOR
+    // ==========================================================
+    function populateFolderSelect(selectedId = "") {
+      const select = $("noteFolder");
+      select.innerHTML = '<option value="">no folder</option>';
+
+      state.folders.forEach(folder => {
+        const option = document.createElement("option");
+        option.value = folder.id;
+        option.textContent = folder.name;
+        select.appendChild(option);
+      });
+
+      select.value = selectedId;
+    }
+
+    function clearPhotoSelection() {
+      state.selectedPhoto = null;
+      state.selectedPhotoUrl = null;
+      $("notePhoto").value = "";
+      $("photoPreview").src = "";
+      $("photoPreview").classList.add("hidden");
+    }
+
+    function showEditor(note = null) {
+      if (!canEdit()) return;
+
+      state.editingId = note?.id || null;
+      clearPhotoSelection();
+
+      $("editorHeading").textContent = note ? "edit your note ♡" : "a new little thought ♡";
+      $("noteTitle").value = note?.title || "";
+      $("noteBody").value = note?.body || "";
+      populateFolderSelect(note?.folderId || "");
+      $("saveNoteButton").textContent = note ? "save changes ♡" : "save note ♡";
+      $("editor").classList.remove("hidden");
+
+      if (note?.photoUrl) {
+        state.selectedPhotoUrl = note.photoUrl;
+        $("photoPreview").src = note.photoUrl;
+        $("photoPreview").classList.remove("hidden");
+      }
+
+      $("editor").scrollIntoView({ behavior: "smooth", block: "start" });
+      $("noteTitle").focus({ preventScroll: true });
+    }
+
+    function hideEditor() {
+      $("editor").classList.add("hidden");
+      $("noteForm").reset();
+      state.editingId = null;
+      clearPhotoSelection();
+    }
+
+    $("newNoteButton").addEventListener("click", () => showEditor());
+    $("cancelEditorButton").addEventListener("click", hideEditor);
+
+    $("notePhoto").addEventListener("change", () => {
+      const file = $("notePhoto").files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        toast("please choose an image file.");
+        $("notePhoto").value = "";
+        return;
+      }
+
+      if (file.size > 8 * 1024 * 1024) {
+        toast("please choose a photo smaller than 8 MB.");
+        $("notePhoto").value = "";
+        return;
+      }
+
+      state.selectedPhoto = file;
+
+      if (state.selectedPhotoUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(state.selectedPhotoUrl);
+      }
+
+      state.selectedPhotoUrl = URL.createObjectURL(file);
+      $("photoPreview").src = state.selectedPhotoUrl;
+      $("photoPreview").classList.remove("hidden");
+    });
+
+    async function uploadPhoto(file) {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `photos/${Date.now()}_${safeName}`;
+      const photoRef = ref(storage, path);
+
+      await uploadBytes(photoRef, file, { contentType: file.type });
+      const url = await getDownloadURL(photoRef);
+
+      return { url, path };
+    }
+
+    $("noteForm").addEventListener("submit", async event => {
       event.preventDefault();
-      saveNoteForm(event.target);
+      if (!canEdit()) return;
+
+      const title = $("noteTitle").value.trim();
+      const body = $("noteBody").value.trim();
+
+      if (!title || !body) {
+        toast("please add a title and your note.");
+        return;
+      }
+
+      const saveButton = $("saveNoteButton");
+      saveButton.disabled = true;
+      saveButton.textContent = "saving…";
+
+      const oldNote = state.notes.find(note => note.id === state.editingId);
+      let photoUrl = oldNote?.photoUrl || state.selectedPhotoUrl || "";
+      let photoPath = oldNote?.photoPath || "";
+
+      try {
+        if (state.selectedPhoto) {
+          const uploaded = await uploadPhoto(state.selectedPhoto);
+          photoUrl = uploaded.url;
+          photoPath = uploaded.path;
+        }
+
+        const data = {
+          title,
+          body,
+          folderId: $("noteFolder").value || "",
+          photoUrl,
+          photoPath,
+          favorite: Boolean(oldNote?.favorite),
+          updatedAt: serverTimestamp()
+        };
+
+        if (state.editingId) {
+          await updateDoc(doc(db, "notes", state.editingId), data);
+          toast("your note has been updated ♡");
+        } else {
+          await addDoc(collection(db, "notes"), {
+            ...data,
+            createdAt: serverTimestamp()
+          });
+          toast("your note has been saved ♡");
+        }
+
+        hideEditor();
+      } catch (error) {
+        console.error("Could not save note:", error);
+        toast("could not save. check your connection and Firebase permissions.");
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = state.editingId ? "save changes ♡" : "save note ♡";
+      }
+    });
+
+    function editNote(note) {
+      showEditor(note);
     }
-  });
 
-  $('#app').addEventListener('change', event => {
-    if (event.target.id !== 'note-images') return;
+    async function toggleFavorite(note) {
+      if (!canEdit()) return;
 
-    const preview = $('#note-image-preview');
-    if (!preview) return;
+      try {
+        await updateDoc(doc(db, "notes", note.id), {
+          favorite: !note.favorite,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error(error);
+        toast("could not update favorite. check Firebase permissions.");
+      }
+    }
 
-    const note = state.notes.find(item => item.id === state.activeNoteId);
-    const existing = note?.images || [];
+    // Delete from Firestore first. If that fails, keep the note visible
+    // so a failed cloud deletion is not mistaken for a permanent deletion.
+    async function deleteNote(note) {
+      if (!canEdit()) return;
 
-    preview.innerHTML = existing.map((url,index) => `
-      <div class="relative aspect-square rounded-lg overflow-hidden">
-        <img src="${esc(url)}" class="photo-img" alt="attachment">
-        <button type="button" data-remove-image="${index}" class="absolute top-1 right-1 rounded-full bg-black/70 text-white w-6 h-6">×</button>
-      </div>`).join('');
+      const confirmed = confirm(`delete "${note.title}"? this cannot be undone.`);
+      if (!confirmed) return;
 
-    [...event.target.files].forEach(file => {
-      const url = URL.createObjectURL(file);
-      preview.insertAdjacentHTML('beforeend', `
-        <div class="aspect-square rounded-lg overflow-hidden">
-          <img src="${url}" class="photo-img" alt="selected image">
-        </div>`);
+      try {
+        await deleteDoc(doc(db, "notes", note.id));
+
+        if (note.photoPath) {
+          try {
+            await deleteObject(ref(storage, note.photoPath));
+          } catch (photoError) {
+            console.warn("Photo could not be deleted:", photoError);
+          }
+        }
+
+        // The live Firestore listener updates the list after deletion.
+        toast("note deleted ♡");
+      } catch (error) {
+        console.error("Note deletion failed:", error);
+        toast("deletion failed. check Firebase Firestore rules and try again.");
+      }
+    }
+
+    // ==========================================================
+    // ANNIVERSARY TIMER: MAY 19
+    // ==========================================================
+    function getNextAnniversary(now) {
+      let year = now.getFullYear();
+      let target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
+
+      if (now >= target) {
+        year += 1;
+        target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
+      }
+
+      return { target, year };
+    }
+
+    function updateAnniversary() {
+      const now = new Date();
+      const { target, year } = getNextAnniversary(now);
+      const diff = Math.max(0, target.getTime() - now.getTime());
+
+      $("days").textContent = Math.floor(diff / 86400000);
+      $("hours").textContent = Math.floor((diff % 86400000) / 3600000);
+      $("minutes").textContent = Math.floor((diff % 3600000) / 60000);
+      $("seconds").textContent = Math.floor((diff % 60000) / 1000);
+
+      const yearsTogether = year - ANNIVERSARY_START_YEAR;
+      $("anniversaryCaption").textContent =
+        `counting down to May 19, ${year} · ${yearsTogether} year${yearsTogether === 1 ? "" : "s"} since our first anniversary ♡`;
+    }
+
+    $("refreshButton").addEventListener("click", () => {
+      renderFolders();
+      renderNotes();
+      toast("your page has been refreshed ♡");
     });
-  });
-}
 
-function loadCloud() {
-  if (!db) {
-    state.cloudStatus = 'Local preview only';
-    return;
-  }
+    // ==========================================================
+    // STARTUP
+    // ==========================================================
+    updateAnniversary();
+    setInterval(updateAnniversary, 1000);
 
-  const subscribe = (collection, apply, fallback) => {
-    const unsubscribe = db.collection(collection).onSnapshot(snapshot => {
-      const rows = snapshot.docs.map(document => ({
-        ...document.data(),
-        id:document.id
-      }));
-
-      apply(rows.length ? rows : fallback);
-      persistLocal();
-      render();
-    }, error => {
-      console.error(`Firestore ${collection} listener error:`, error);
-      cloudError = `Could not sync ${collection}. Check Firestore rules and connection.`;
-      render();
-    });
-
-    state.unsubs.push(unsubscribe);
-  };
-
-  subscribe('notes', rows => state.notes = rows, SAMPLE_NOTES.map(note => ({...note})));
-  subscribe('folders', rows => state.folders = rows, SAMPLE_FOLDERS.map(folder => ({...folder})));
-  subscribe('photos', rows => state.photos = rows, []);
-}
-
-/* A visible error screen prevents a silent blank page if startup fails. */
-window.addEventListener('error', event => {
-  console.error('App runtime error:', event.error || event.message);
-});
-
-window.addEventListener('unhandledrejection', event => {
-  console.error('Unhandled app error:', event.reason);
-});
-
-try {
-  loadLocal();
-  bindMain();
-
-  if (state.user) render();
-  else loginScreen();
-
-  loadCloud();
-} catch (error) {
-  console.error('App startup failed:', error);
-  const app = $('#app');
-
-  if (app) {
-    app.innerHTML = `
-      <main style="max-width:560px;margin:12vh auto;padding:24px;font-family:system-ui;color:#2c2a29">
-        <h1>notes for me &amp; rhy</h1>
-        <p>Sorry, the app could not start.</p>
-        <p>Refresh the page. If the problem continues, check the browser console for the first error message.</p>
-        <button onclick="location.reload()" style="padding:10px 16px;border-radius:999px;background:#2c2a29;color:white;border:0">Reload page</button>
-      </main>`;
-  }
-}
-})();
-</script>
+    // Keep the app at the login screen until a user chooses a path.
+    // There are intentionally no preloaded demo notes.
+  </script>
 </body>
 </html>
