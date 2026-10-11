@@ -86,7 +86,91 @@
             { id: 'folder-photos', name: 'our pictures', description: 'snapshots and snapshots', color: '#F7EBE8', visibility: 'public' }
         ];
 
+        // Allowed accounts (passwords stored as SHA-256 hashes, never in plain text)
+        const USERS = {
+            rhyzine: { name: 'Rhyzine', passwordHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9' },
+            ronan: { name: 'Ronan', passwordHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9' }
+        };
+
+        const sha256 = async (text) => {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        };
+
+        function LoginView({ onLogin, onGuest }) {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoading(true);
+                const user = USERS[username.trim().toLowerCase()];
+                const hash = await sha256(password);
+                setLoading(false);
+                if (user && user.passwordHash === hash) {
+                    onLogin(user.name);
+                } else {
+                    setError('wrong username or password');
+                }
+            };
+
+            return (
+                <div className="min-h-full flex items-center justify-center bg-cream px-6 py-12">
+                    <div className="w-full max-w-sm">
+                        <div className="text-center mb-8">
+                            <h1 className="font-serif text-3xl tracking-tight font-medium">notes for me & rhy</h1>
+                            <p className="text-sm text-stone-500 font-light mt-2">digital journal & memories</p>
+                        </div>
+                        <form onSubmit={handleSubmit} className="bg-white border border-warmBlush rounded-3xl p-6 shadow-sm space-y-4">
+                            <div>
+                                <label className="block text-xs text-stone-500 mb-1">username</label>
+                                <input
+                                    type="text"
+                                    autoComplete="username"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream focus:outline-none focus:border-dustyRose text-sm"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-stone-500 mb-1">password</label>
+                                <input
+                                    type="password"
+                                    autoComplete="current-password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream focus:outline-none focus:border-dustyRose text-sm"
+                                    required
+                                />
+                            </div>
+                            {error && <p className="text-xs text-rose-600">{error}</p>}
+                            <button type="submit" disabled={loading} className="w-full py-2.5 bg-charcoal text-cream rounded-full text-sm font-medium hover:opacity-90 disabled:opacity-60">
+                                {loading ? 'logging in…' : 'log in'}
+                            </button>
+                        </form>
+                        <div className="flex items-center gap-3 my-6">
+                            <div className="flex-1 h-px bg-warmBlush"></div>
+                            <span className="text-xs text-stone-400">or</span>
+                            <div className="flex-1 h-px bg-warmBlush"></div>
+                        </div>
+                        <button onClick={onGuest} className="w-full py-2.5 bg-white text-charcoal border border-stone-200 rounded-full text-sm font-medium hover:bg-stone-50">
+                            👀 continue as guest
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         function App() {
+            const [session, setSession] = useState(() => {
+                const saved = localStorage.getItem('rhythm_session');
+                return saved ? JSON.parse(saved) : null; // { name, role: 'admin' | 'guest' }
+            });
+
             const [notes, setNotes] = useState(() => {
                 const saved = localStorage.getItem('rhythm_notes');
                 return saved ? JSON.parse(saved) : initialNotes;
@@ -102,7 +186,7 @@
                 return saved ? JSON.parse(saved) : [];
             });
 
-            const [isAdmin, setIsAdmin] = useState(true); // Toggle between admin and visitor mode
+            const isAdmin = session?.role === 'admin';
             const [currentView, setCurrentView] = useState('home'); // home, notes, folders, photos, editor, view-note, folder-detail
             const [activeNote, setActiveNote] = useState(null);
             const [activeFolder, setActiveFolder] = useState(null);
@@ -122,6 +206,11 @@
                 localStorage.setItem('rhythm_photos', JSON.stringify(photos));
             }, [photos]);
 
+            useEffect(() => {
+                if (session) localStorage.setItem('rhythm_session', JSON.stringify(session));
+                else localStorage.removeItem('rhythm_session');
+            }, [session]);
+
             const showToast = (message) => {
                 setToast(message);
                 setTimeout(() => setToast(null), 3000);
@@ -132,7 +221,16 @@
                 if (window.lucide) {
                     window.lucide.createIcons();
                 }
-            }, [currentView, notes, folders, photos, toast]);
+            }, [currentView, notes, folders, photos, toast, session]);
+
+            if (!session) {
+                return (
+                    <LoginView
+                        onLogin={(name) => { setSession({ name, role: 'admin' }); setCurrentView('home'); showToast(`welcome back, ${name}!`); }}
+                        onGuest={() => { setSession({ name: 'guest', role: 'guest' }); setCurrentView('home'); }}
+                    />
+                );
+            }
 
             return (
                 <div className="min-h-full flex flex-col bg-cream text-charcoal">
@@ -152,11 +250,14 @@
                             </button>
                             
                             <div className="flex items-center gap-2">
-                                <button 
-                                    onClick={() => setIsAdmin(!isAdmin)}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${isAdmin ? 'bg-warmBlush text-charcoal' : 'bg-stone-100 text-stone-500'}`}
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${isAdmin ? 'bg-warmBlush text-charcoal' : 'bg-stone-100 text-stone-500'}`}>
+                                    {isAdmin ? `✨ ${session.name}` : '👀 guest'}
+                                </span>
+                                <button
+                                    onClick={() => { setSession(null); setCurrentView('home'); }}
+                                    className="px-3 py-1 rounded-full text-xs font-medium text-stone-500 hover:bg-stone-100"
                                 >
-                                    {isAdmin ? '✨ admin mode' : '👀 public view'}
+                                    {isAdmin ? 'log out' : 'log in'}
                                 </button>
                             </div>
                         </div>
@@ -287,16 +388,18 @@
                                 <i data-lucide="image" className="w-5 h-5"></i>
                                 <span>photos</span>
                             </button>
-                            <button onClick={() => {
-                                const name = prompt('New folder name:');
-                                if (name) {
-                                    setFolders([...folders, { id: generateId(), name, description: '', color: '#F7EBE8', visibility: 'public' }]);
-                                    showToast('Folder created!');
-                                }
-                            }} className="flex flex-col items-center gap-1 text-xs text-stone-400">
-                                <i data-lucide="folder-plus" className="w-5 h-5"></i>
-                                <span>folder</span>
-                            </button>
+                            {isAdmin && (
+                                <button onClick={() => {
+                                    const name = prompt('New folder name:');
+                                    if (name) {
+                                        setFolders([...folders, { id: generateId(), name, description: '', color: '#F7EBE8', visibility: 'public' }]);
+                                        showToast('Folder created!');
+                                    }
+                                }} className="flex flex-col items-center gap-1 text-xs text-stone-400">
+                                    <i data-lucide="folder-plus" className="w-5 h-5"></i>
+                                    <span>folder</span>
+                                </button>
+                            )}
                         </div>
                     </nav>
                 </div>
