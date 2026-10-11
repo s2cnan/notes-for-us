@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>notes for me & rhy</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FDFBF7',
+                        warmBlush: '#F7EBE8',
+                        dustyRose: '#D4A3A3',
+                        charcoal: '#2C2A29',
+                        softLavender: '#EAE6F8'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel Standalone for JSX compilation in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FDFBF7; color: #2C2A29; -webkit-tap-highlight-color: transparent; }
+        h1, h2, h3, h4, .font-serif { font-family: 'Playfair Display', serif; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .safe-top { padding-top: env(safe-area-inset-top, 20px); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D4A3A3; border-radius: 4px; }
+    </style>
+</head>
+<body class="h-full bg-cream text-charcoal antialiased selection:bg-warmBlush">
+    <div id="root" class="h-full"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // Simple unique ID generator for mobile reliability
+        const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
+
+        // Initial Sample Data for Ronan & Rhy
+        const initialNotes = [
+            {
+                id: 'note-1',
+                title: 'little moments in leyte',
+                content: 'today was quiet and peaceful. the afternoon sun felt warm against the glass, and listening to your voice note made the whole day feel lighter. notes for me & rhy is our little corner of the internet to keep these small memories safe.',
+                folderId: 'folder-memories',
+                tags: ['memories', 'thoughts'],
+                published: true,
+                createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+                updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+                images: []
+            },
+            {
+                id: 'note-2',
+                title: 'a letter for tomorrow',
+                content: 'just wanted to remind you how much every single conversation means to me. no matter how busy things get with college and everything else, this place is always here for us.',
+                folderId: 'folder-letters',
+                tags: ['letters'],
+                published: true,
+                createdAt: new Date(Date.now() - 86400000).toISOString(),
+                updatedAt: new Date(Date.now() - 86400000).toISOString(),
+                images: []
+            }
+        ];
+
+        const initialFolders = [
+            { id: 'folder-memories', name: 'memories', description: 'our everyday moments', color: '#D4A3A3', visibility: 'public' },
+            { id: 'folder-letters', name: 'letters', description: 'notes written just for us', color: '#EAE6F8', visibility: 'shared' },
+            { id: 'folder-photos', name: 'our pictures', description: 'snapshots and snapshots', color: '#F7EBE8', visibility: 'public' }
+        ];
+
+        function App() {
+            const [notes, setNotes] = useState(() => {
+                const saved = localStorage.getItem('rhythm_notes');
+                return saved ? JSON.parse(saved) : initialNotes;
+            });
+
+            const [folders, setFolders] = useState(() => {
+                const saved = localStorage.getItem('rhythm_folders');
+                return saved ? JSON.parse(saved) : initialFolders;
+            });
+
+            const [photos, setPhotos] = useState(() => {
+                const saved = localStorage.getItem('rhythm_photos');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            const [isAdmin, setIsAdmin] = useState(true); // Toggle between admin and visitor mode
+            const [currentView, setCurrentView] = useState('home'); // home, notes, folders, photos, editor, view-note, folder-detail
+            const [activeNote, setActiveNote] = useState(null);
+            const [activeFolder, setActiveFolder] = useState(null);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [toast, setToast] = useState(null);
+
+            // Save to localStorage
+            useEffect(() => {
+                localStorage.setItem('rhythm_notes', JSON.stringify(notes));
+            }, [notes]);
+
+            useEffect(() => {
+                localStorage.setItem('rhythm_folders', JSON.stringify(folders));
+            }, [folders]);
+
+            useEffect(() => {
+                localStorage.setItem('rhythm_photos', JSON.stringify(photos));
+            }, [photos]);
+
+            const showToast = (message) => {
+                setToast(message);
+                setTimeout(() => setToast(null), 3000);
+            };
+
+            // Lucide icon refresher
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [currentView, notes, folders, photos, toast]);
+
+            return (
+                <div className="min-h-full flex flex-col bg-cream text-charcoal">
+                    {/* Toast Notification */}
+                    {toast && (
+                        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 bg-charcoal text-cream px-4 py-2 rounded-full text-sm shadow-lg transition-all animate-bounce">
+                            {toast}
+                        </div>
+                    )}
+
+                    {/* Navigation Bar */}
+                    <header className="sticky top-0 z-40 bg-cream/85 backdrop-blur-md border-b border-warmBlush px-4 py-3">
+                        <div className="max-w-2xl mx-auto flex items-center justify-between">
+                            <button onClick={() => setCurrentView('home')} className="text-left">
+                                <h1 className="font-serif text-lg tracking-tight font-medium">notes for me & rhy</h1>
+                                <p className="text-xs text-stone-500 font-light">digital journal & memories</p>
+                            </button>
+                            
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={() => setIsAdmin(!isAdmin)}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${isAdmin ? 'bg-warmBlush text-charcoal' : 'bg-stone-100 text-stone-500'}`}
+                                >
+                                    {isAdmin ? '✨ admin mode' : '👀 public view'}
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 pb-24">
+                        {currentView === 'home' && (
+                            <HomeView 
+                                notes={notes} 
+                                folders={folders} 
+                                photos={photos}
+                                isAdmin={isAdmin}
+                                onSelectNote={(note) => { setActiveNote(note); setCurrentView('view-note'); }}
+                                onSelectFolder={(folder) => { setActiveFolder(folder); setCurrentView('folder-detail'); }}
+                                onCreateNote={() => { setActiveNote(null); setCurrentView('editor'); }}
+                                onCreateFolder={() => {
+                                    const name = prompt('Enter folder name:');
+                                    if (name) {
+                                        const newFolder = { id: generateId(), name, description: '', color: '#F7EBE8', visibility: 'public' };
+                                        setFolders([...folders, newFolder]);
+                                        showToast('Folder created successfully!');
+                                    }
+                                }}
+                                onViewAllNotes={() => setCurrentView('notes')}
+                                onViewAllPhotos={() => setCurrentView('photos')}
+                            />
+                        )}
+
+                        {currentView === 'notes' && (
+                            <AllNotesView 
+                                notes={notes} 
+                                isAdmin={isAdmin}
+                                searchQuery={searchQuery}
+                                setSearchQuery={setSearchQuery}
+                                onSelectNote={(note) => { setActiveNote(note); setCurrentView('view-note'); }}
+                                onBack={() => setCurrentView('home')}
+                                onCreateNote={() => { setActiveNote(null); setCurrentView('editor'); }}
+                            />
+                        )}
+
+                        {currentView === 'view-note' && activeNote && (
+                            <NoteDetailView 
+                                note={activeNote}
+                                folders={folders}
+                                isAdmin={isAdmin}
+                                onBack={() => setCurrentView('home')}
+                                onEdit={() => setCurrentView('editor')}
+                                onDelete={() => {
+                                    if (confirm('Delete this note?')) {
+                                        setNotes(notes.filter(n => n.id !== activeNote.id));
+                                        setCurrentView('home');
+                                        showToast('Note deleted.');
+                                    }
+                                }}
+                            />
+                        )}
+
+                        {currentView === 'editor' && (
+                            <NoteEditorView 
+                                initialNote={activeNote}
+                                folders={folders}
+                                onSave={(savedNote) => {
+                                    if (activeNote) {
+                                        setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
+                                    } else {
+                                        setNotes([savedNote, ...notes]);
+                                    }
+                                    setCurrentView('home');
+                                    showToast('Note saved successfully!');
+                                }}
+                                onCancel={() => setCurrentView('home')}
+                            />
+                        )}
+
+                        {currentView === 'folder-detail' && activeFolder && (
+                            <FolderDetailView 
+                                folder={activeFolder}
+                                notes={notes.filter(n => n.folderId === activeFolder.id)}
+                                photos={photos.filter(p => p.folderId === activeFolder.id)}
+                                isAdmin={isAdmin}
+                                onBack={() => setCurrentView('home')}
+                                onSelectNote={(note) => { setActiveNote(note); setCurrentView('view-note'); }}
+                                onAddPhoto={(photoUrl, caption) => {
+                                    const newPhoto = { id: generateId(), url: photoUrl, caption, folderId: activeFolder.id, createdAt: new Date().toISOString() };
+                                    setPhotos([...photos, newPhoto]);
+                                    showToast('Photo added!');
+                                }}
+                            />
+                        )}
+
+                        {currentView === 'photos' && (
+                            <PhotosView 
+                                photos={photos}
+                                folders={folders}
+                                isAdmin={isAdmin}
+                                onBack={() => setCurrentView('home')}
+                                onAddPhoto={(photoUrl, caption, folderId) => {
+                                    const newPhoto = { id: generateId(), url: photoUrl, caption, folderId: folderId || '', createdAt: new Date().toISOString() };
+                                    setPhotos([...photos, newPhoto]);
+                                    showToast('Photo added to memories!');
+                                }}
+                                onDeletePhoto={(id) => {
+                                    setPhotos(photos.filter(p => p.id !== id));
+                                    showToast('Photo removed.');
+                                }}
+                            />
+                        )}
+                    </main>
+
+                    {/* Bottom Navigation for Mobile */}
+                    <nav className="fixed bottom-0 left-0 right-0 bg-cream/90 backdrop-blur-md border-t border-warmBlush py-3 px-6 z-30">
+                        <div className="max-w-xs mx-auto flex justify-around items-center">
+                            <button onClick={() => setCurrentView('home')} className={`flex flex-col items-center gap-1 text-xs ${currentView === 'home' ? 'text-charcoal font-semibold' : 'text-stone-400'}`}>
+                                <i data-lucide="home" className="w-5 h-5"></i>
+                                <span>home</span>
+                            </button>
+                            <button onClick={() => setCurrentView('notes')} className={`flex flex-col items-center gap-1 text-xs ${currentView === 'notes' ? 'text-charcoal font-semibold' : 'text-stone-400'}`}>
+                                <i data-lucide="book-open" className="w-5 h-5"></i>
+                                <span>notes</span>
+                            </button>
+                            {isAdmin && (
+                                <button onClick={() => { setActiveNote(null); setCurrentView('editor'); }} className="flex flex-col items-center gap-1 text-xs text-rose-500 font-semibold bg-warmBlush p-2 rounded-full -mt-4 shadow-sm">
+                                    <i data-lucide="plus" className="w-6 h-6"></i>
+                                </button>
+                            )}
+                            <button onClick={() => setCurrentView('photos')} className={`flex flex-col items-center gap-1 text-xs ${currentView === 'photos' ? 'text-charcoal font-semibold' : 'text-stone-400'}`}>
+                                <i data-lucide="image" className="w-5 h-5"></i>
+                                <span>photos</span>
+                            </button>
+                            <button onClick={() => {
+                                const name = prompt('New folder name:');
+                                if (name) {
+                                    setFolders([...folders, { id: generateId(), name, description: '', color: '#F7EBE8', visibility: 'public' }]);
+                                    showToast('Folder created!');
+                                }
+                            }} className="flex flex-col items-center gap-1 text-xs text-stone-400">
+                                <i data-lucide="folder-plus" className="w-5 h-5"></i>
+                                <span>folder</span>
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            );
+        }
+
+        // Home View Component
+        function HomeView({ notes, folders, photos, isAdmin, onSelectNote, onSelectFolder, onCreateNote, onCreateFolder, onViewAllNotes, onViewAllPhotos }) {
+            const displayedNotes = isAdmin ? notes : notes.filter(n => n.published);
+
+            return (
+                <div className="space-y-8 animate-fadeIn">
+                    {/* Welcome Header */}
+                    <div className="text-center py-6 px-4 bg-warmBlush/40 rounded-2xl border border-warmBlush/60">
+                        <h2 className="font-serif text-2xl font-normal mb-2">notes for me & rhy</h2>
+                        <p className="text-sm text-stone-600 max-w-md mx-auto font-light leading-relaxed">
+                            a quiet space for our thoughts, letters, photos, and memories.
+                        </p>
+                        {isAdmin && (
+                            <div className="mt-4 flex justify-center gap-3">
+                                <button onClick={onCreateNote} className="px-4 py-2 bg-charcoal text-cream rounded-full text-xs font-medium shadow-sm hover:opacity-90 flex items-center gap-2">
+                                    <i data-lucide="pen-tool" className="w-3.5 h-3.5"></i> write a note
+                                </button>
+                                <button onClick={onCreateFolder} className="px-4 py-2 bg-white text-charcoal border border-stone-200 rounded-full text-xs font-medium hover:bg-stone-50 flex items-center gap-2">
+                                    <i data-lucide="folder-plus" className="w-3.5 h-3.5"></i> new folder
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Folders Section */}
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-serif text-lg">folders</h3>
+                            <span className="text-xs text-stone-400">{folders.length} folders</span>
+                        </div>
+                        {folders.length === 0 ? (
+                            <p className="text-sm text-stone-400 italic">No folders yet.</p>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-3">
+                                {folders.map(folder => (
+                                    <div 
+                                        key={folder.id}
+                                        onClick={() => onSelectFolder(folder)}
+                                        className="p-4 rounded-xl border border-stone-200/80 bg-white hover:border-dustyRose transition-all cursor-pointer shadow-sm flex flex-col justify-between"
+                                    >
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <i data-lucide="folder" className="w-5 h-5 text-dustyRose"></i>
+                                                <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">{folder.visibility}</span>
+                                            </div>
+                                            <h4 className="font-serif font-medium text-base mb-1">{folder.name}</h4>
+                                            {folder.description && <p className="text-xs text-stone-500 line-clamp-1">{folder.description}</p>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Recent Notes Section */}
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-serif text-lg">recent notes</h3>
+                            <button onClick={onViewAllNotes} className="text-xs text-stone-500 hover:underline">view all</button>
+                        </div>
+                        {displayedNotes.length === 0 ? (
+                            <div className="text-center py-10 bg-stone-50 rounded-xl border border-dashed border-stone-200">
+                                <p className="text-sm text-stone-400 mb-2">no notes published yet.</p>
+                                {isAdmin && (
+                                    <button onClick={onCreateNote} className="text-xs text-rose-600 underline font-medium">write your first note</button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {displayedNotes.slice(0, 3).map(note => {
+                                    const folder = folders.find(f => f.id === note.folderId);
+                                    return (
+                                        <div 
+                                            key={note.id}
+                                            onClick={() => onSelectNote(note)}
+                                            className="p-4 rounded-xl bg-white border border-stone-200/80 hover:border-dustyRose transition-all cursor-pointer shadow-sm"
+                                        >
+                                            <div className="flex items-center justify-between text-xs text-stone-400 mb-1">
+                                                <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                                                {folder && <span className="text-rose-400">{folder.name}</span>}
+                                            </div>
+                                            <h4 className="font-serif text-lg mb-1">{note.title || 'untitled'}</h4>
+                                            <p className="text-sm text-stone-600 line-clamp-2 font-light">{note.content}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Photo Memories Teaser */}
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-serif text-lg">photo memories</h3>
+                            <button onClick={onViewAllPhotos} className="text-xs text-stone-500 hover:underline">view gallery</button>
+                        </div>
+                        {photos.length === 0 ? (
+                            <p className="text-sm text-stone-400 italic">No photos uploaded yet.</p>
+                        ) : (
+                            <div className="grid grid-cols-3 gap-2">
+                                {photos.slice(0, 3).map(photo => (
+                                    <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-stone-100 border border-stone-200">
+                                        <img src={photo.url} alt={photo.caption || 'memory'} className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // All Notes View
+        function AllNotesView({ notes, isAdmin, searchQuery, setSearchQuery, onSelectNote, onBack, onCreateNote }) {
+            const filteredNotes = notes.filter(n => (isAdmin || n.published) && (n.title.toLowerCase().includes(searchQuery.toLowerCase()) || n.content.toLowerCase().includes(searchQuery.toLowerCase())));
+
+            return (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1 hover:text-charcoal">
+                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back home
+                        </button>
+                        <h2 className="font-serif text-xl">all notes</h2>
+                        {isAdmin ? (
+                            <button onClick={onCreateNote} className="text-xs bg-charcoal text-cream px-3 py-1.5 rounded-full">new note</button>
+                        ) : <div />}
+                    </div>
+
+                    <div className="relative">
+                        <i data-lucide="search" className="absolute left-3 top-3 w-4 h-4 text-stone-400"></i>
+                        <input 
+                            type="text"
+                            placeholder="search notes..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 rounded-xl bg-white border border-stone-200 text-sm focus:outline-none focus:border-dustyRose"
+                        />
+                    </div>
+
+                    <div className="space-y-3">
+                        {filteredNotes.length === 0 ? (
+                            <p className="text-center text-sm text-stone-400 py-10">no notes found.</p>
+                        ) : (
+                            filteredNotes.map(note => (
+                                <div 
+                                    key={note.id}
+                                    onClick={() => onSelectNote(note)}
+                                    className="p-4 rounded-xl bg-white border border-stone-200/80 hover:border-dustyRose transition-all cursor-pointer shadow-sm"
+                                >
+                                    <div className="flex items-center justify-between text-xs text-stone-400 mb-1">
+                                        <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                                        {!note.published && <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px]">draft</span>}
+                                    </div>
+                                    <h4 className="font-serif text-lg mb-1">{note.title || 'untitled'}</h4>
+                                    <p className="text-sm text-stone-600 line-clamp-2 font-light">{note.content}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Note Detail View
+        function NoteDetailView({ note, folders, isAdmin, onBack, onEdit, onDelete }) {
+            const folder = folders.find(f => f.id === note.folderId);
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1 hover:text-charcoal">
+                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back
+                        </button>
+                        {isAdmin && (
+                            <div className="flex items-center gap-2">
+                                <button onClick={onEdit} className="text-xs bg-stone-100 px-3 py-1 rounded-full text-stone-600 hover:bg-stone-200">edit</button>
+                                <button onClick={onDelete} className="text-xs bg-rose-50 text-rose-600 px-3 py-1 rounded-full hover:bg-rose-100">delete</button>
+                            </div>
+                        )}
+                    </div>
+
+                    <article className="bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between text-xs text-stone-400 border-b border-stone-100 pb-3">
+                            <span>{new Date(note.createdAt).toLocaleDateString()}</span>
+                            {folder && <span className="text-rose-400 font-medium">{folder.name}</span>}
+                        </div>
+                        <h2 className="font-serif text-2xl font-normal">{note.title || 'untitled'}</h2>
+                        <div className="text-stone-700 font-light leading-relaxed whitespace-pre-wrap text-base">
+                            {note.content}
+                        </div>
+                    </article>
+                </div>
+            );
+        }
+
+        // Note Editor View
+        function NoteEditorView({ initialNote, folders, onSave, onCancel }) {
+            const [title, setTitle] = useState(initialNote ? initialNote.title : '');
+            const [content, setContent] = useState(initialNote ? initialNote.content : '');
+            const [folderId, setFolderId] = useState(initialNote ? initialNote.folderId : (folders[0]?.id || ''));
+            const [published, setPublished] = useState(initialNote ? initialNote.published : true);
+
+            const handleSave = (e) => {
+                e.preventDefault();
+                const noteToSave = {
+                    id: initialNote ? initialNote.id : generateId(),
+                    title,
+                    content,
+                    folderId,
+                    published,
+                    createdAt: initialNote ? initialNote.createdAt : new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    images: initialNote ? initialNote.images : []
+                };
+                onSave(noteToSave);
+            };
+
+            return (
+                <form onSubmit={handleSave} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <button type="button" onClick={onCancel} className="text-xs text-stone-500">cancel</button>
+                        <h2 className="font-serif text-lg">{initialNote ? 'edit note' : 'new note'}</h2>
+                        <button type="submit" className="text-xs bg-charcoal text-cream px-4 py-1.5 rounded-full font-medium">save</button>
+                    </div>
+
+                    <input 
+                        type="text"
+                        placeholder="note title..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full font-serif text-2xl bg-transparent border-b border-stone-200 pb-2 focus:outline-none focus:border-dustyRose"
+                    />
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs text-stone-400 block mb-1">folder</label>
+                            <select 
+                                value={folderId} 
+                                onChange={(e) => setFolderId(e.target.value)}
+                                className="w-full p-2 rounded-xl bg-white border border-stone-200 text-sm focus:outline-none"
+                            >
+                                <option value="">(unfiled)</option>
+                                {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs text-stone-400 block mb-1">status</label>
+                            <select 
+                                value={published ? 'true' : 'false'} 
+                                onChange={(e) => setPublished(e.target.value === 'true')}
+                                className="w-full p-2 rounded-xl bg-white border border-stone-200 text-sm focus:outline-none"
+                            >
+                                <option value="true">published</option>
+                                <option value="false">draft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <textarea 
+                        rows="12"
+                        placeholder="write your thoughts here..."
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        className="w-full p-4 rounded-xl bg-white border border-stone-200 text-sm font-light leading-relaxed focus:outline-none focus:border-dustyRose"
+                    ></textarea>
+                </form>
+            );
+        }
+
+        // Folder Detail View
+        function FolderDetailView({ folder, notes, photos, isAdmin, onBack, onSelectNote, onAddPhoto }) {
+            const handleAddPhotoPrompt = () => {
+                const url = prompt('Enter photo image URL (e.g. from Unsplash or your image host):');
+                if (url) {
+                    const caption = prompt('Enter a short caption (optional):');
+                    onAddPhoto(url, caption || '');
+                }
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1">
+                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back
+                        </button>
+                        <h2 className="font-serif text-xl">{folder.name}</h2>
+                        {isAdmin ? (
+                            <button onClick={handleAddPhotoPrompt} className="text-xs bg-warmBlush px-3 py-1.5 rounded-full text-charcoal">add photo</button>
+                        ) : <div />}
+                    </div>
+
+                    {folder.description && (
+                        <p className="text-sm text-stone-600 font-light bg-warmBlush/30 p-3 rounded-xl">{folder.description}</p>
+                    )}
+
+                    <div>
+                        <h3 className="font-serif text-lg mb-3">notes in this folder</h3>
+                        {notes.length === 0 ? (
+                            <p className="text-sm text-stone-400 italic">No notes in this folder.</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {notes.map(note => (
+                                    <div 
+                                        key={note.id}
+                                        onClick={() => onSelectNote(note)}
+                                        className="p-4 rounded-xl bg-white border border-stone-200/80 cursor-pointer shadow-sm"
+                                    >
+                                        <h4 className="font-serif text-lg mb-1">{note.title || 'untitled'}</h4>
+                                        <p className="text-sm text-stone-600 line-clamp-1 font-light">{note.content}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div>
+                        <h3 className="font-serif text-lg mb-3">photos in this folder</h3>
+                        {photos.length === 0 ? (
+                            <p className="text-sm text-stone-400 italic">No photos in this folder.</p>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-3">
+                                {photos.map(photo => (
+                                    <div key={photo.id} className="bg-white p-2 rounded-xl border border-stone-200 shadow-sm space-y-2">
+                                        <div className="aspect-square rounded-lg overflow-hidden bg-stone-100">
+                                            <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />
+                                        </div>
+                                        {photo.caption && <p className="text-xs text-stone-600 font-light">{photo.caption}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Photos Gallery View
+        function PhotosView({ photos, folders, isAdmin, onBack, onAddPhoto, onDeletePhoto }) {
+            const handleAdd = () => {
+                const url = prompt('Enter photo image URL:');
+                if (url) {
+                    const caption = prompt('Enter a caption (optional):');
+                    const folderId = prompt(`Choose folder ID or leave blank:\n${folders.map(f => `${f.name}:${f.id}`).join('\n')}`);
+                    onAddPhoto(url, caption || '', folderId);
+                }
+            };
+
+            return (
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <button onClick={onBack} className="text-xs text-stone-500 flex items-center gap-1">
+                            <i data-lucide="arrow-left" className="w-4 h-4"></i> back
+                        </button>
+                        <h2 className="font-serif text-xl">photo memories</h2>
+                        {isAdmin ? (
+                            <button onClick={handleAdd} className="text-xs bg-charcoal text-cream px-3 py-1.5 rounded-full">add photo</button>
+                        ) : <div />}
+                    </div>
+
+                    {photos.length === 0 ? (
+                        <p className="text-center text-sm text-stone-400 py-10">no photos saved yet.</p>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                            {photos.map(photo => (
+                                <div key={photo.id} className="bg-white p-2 rounded-xl border border-stone-200 shadow-sm space-y-2 relative group">
+                                    <div className="aspect-square rounded-lg overflow-hidden bg-stone-100">
+                                        <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" />
+                                    </div>
+                                    {photo.caption && <p className="text-xs text-stone-600 font-light">{photo.caption}</p>}
+                                    {isAdmin && (
+                                        <button onClick={() => onDeletePhoto(photo.id)} className="absolute top-4 right-4 bg-white/80 p-1 rounded-full text-rose-600 hover:bg-white">
+                                            <i data-lucide="trash-2" className="w-4 h-4"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
