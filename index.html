@@ -17,7 +17,6 @@
       --danger: #c94d67;
       --shadow: 0 8px 32px rgba(116, 67, 84, 0.08);
       
-      /* Glass variables */
       --glass-bg: rgba(255, 255, 255, 0.6);
       --glass-blur: blur(20px) saturate(160%);
     }
@@ -26,7 +25,6 @@
 
     body {
       margin: 0;
-      /* Soft mesh gradient background fixed to the viewport for the glass to glide over */
       background: 
         radial-gradient(circle at top left, #ffe4ec 0%, transparent 45%),
         radial-gradient(circle at bottom right, #ffeeda 0%, transparent 40%),
@@ -88,9 +86,7 @@
       transition: background 0.2s;
     }
     
-    .field:focus {
-      background: rgba(255, 255, 255, 0.8);
-    }
+    .field:focus { background: rgba(255, 255, 255, 0.8); }
 
     .btn {
       border: 1px solid rgba(255, 255, 255, 0.4);
@@ -577,7 +573,7 @@
 
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
 
-  <!-- FIXED FIREBASE VERSIONS HERE (12.0.0 DOES NOT EXIST YET, REPLACED WITH STABLE 10.14.1) -->
+  <!-- FIRESTORE ONLY (STORAGE REMOVED TO AVOID BILLING/UPGRADE ISSUES) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
@@ -585,9 +581,6 @@
       getFirestore, collection, doc, addDoc, updateDoc,
       deleteDoc, onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-    import {
-      getStorage, ref, uploadBytes, getDownloadURL, deleteObject
-    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCoLVIagQV2nAoAqayU8UrkGGfWy7pQJbI",
@@ -601,7 +594,6 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
     isSupported()
       .then(supported => {
@@ -1054,27 +1046,20 @@
       const file = $("notePhoto").files?.[0]; 
       if (!file) return;
       
-      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) { 
-        toast("please choose an image smaller than 8 MB."); 
+      if (!file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) { 
+        toast("please choose an image smaller than 2 MB."); 
         $("notePhoto").value = ""; 
         return; 
       }
       
-      state.selectedPhoto = file;
-      if (state.selectedPhotoUrl?.startsWith("blob:")) URL.revokeObjectURL(state.selectedPhotoUrl);
-      
-      state.selectedPhotoUrl = URL.createObjectURL(file);
-      $("photoPreview").src = state.selectedPhotoUrl; 
-      $("photoPreview").classList.remove("hidden");
+      const reader = new FileReader();
+      reader.onload = e => {
+        state.selectedPhotoUrl = e.target.result;
+        $("photoPreview").src = state.selectedPhotoUrl; 
+        $("photoPreview").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
     });
-
-    async function uploadPhoto(file) {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `photos/${Date.now()}_${safeName}`; 
-      const photoRef = ref(storage, path);
-      await uploadBytes(photoRef, file, { contentType: file.type });
-      return { url: await getDownloadURL(photoRef), path };
-    }
 
     $("noteForm").addEventListener("submit", async event => {
       event.preventDefault(); 
@@ -1090,18 +1075,11 @@
       
       const oldNote = state.notes.find(n => n.id === state.editingId);
       let photoUrl = oldNote?.photoUrl || state.selectedPhotoUrl || "";
-      let photoPath = oldNote?.photoPath || "";
 
       try {
-        if (state.selectedPhoto) {
-          const uploaded = await uploadPhoto(state.selectedPhoto);
-          photoUrl = uploaded.url; 
-          photoPath = uploaded.path;
-        }
-        
         const data = { 
           title, body, folderId: $("noteFolder").value || "", 
-          photoUrl, photoPath, favorite: Boolean(oldNote?.favorite), 
+          photoUrl, favorite: Boolean(oldNote?.favorite), 
           updatedAt: serverTimestamp() 
         };
         
@@ -1138,10 +1116,6 @@
       if (!confirm(`delete "${note.title}"? this cannot be undone.`)) return;
       try {
         await deleteDoc(doc(db, "notes", note.id));
-        if (note.photoPath) {
-          try { await deleteObject(ref(storage, note.photoPath)); } 
-          catch (e) { console.error("Storage delete failed:", e); }
-        }
         toast("note deleted ♡");
       } catch (error) { 
         console.error(error); 
@@ -1189,7 +1163,6 @@
       });
     }
 
-    let selectedBookCover = null; 
     let selectedBookCoverUrl = null;
 
     $("newBookButton").addEventListener("click", () => {
@@ -1200,9 +1173,6 @@
     $("cancelBookButton").addEventListener("click", () => {
       $("bookEditor").classList.add("hidden"); 
       $("bookForm").reset();
-      selectedBookCover = null;
-      
-      if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
       selectedBookCoverUrl = null; 
       $("bookCoverPreview").src = ""; 
       $("bookCoverPreview").classList.add("hidden");
@@ -1212,18 +1182,19 @@
       const file = $("bookCover").files?.[0]; 
       if (!file) return;
       
-      if (!file.type.startsWith("image/")) { 
-        toast("please choose an image file for the cover."); 
+      if (!file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) { 
+        toast("please choose a cover image smaller than 2 MB."); 
         $("bookCover").value = ""; 
         return; 
       }
       
-      selectedBookCover = file;
-      if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
-      
-      selectedBookCoverUrl = URL.createObjectURL(file);
-      $("bookCoverPreview").src = selectedBookCoverUrl; 
-      $("bookCoverPreview").classList.remove("hidden");
+      const reader = new FileReader();
+      reader.onload = e => {
+        selectedBookCoverUrl = e.target.result;
+        $("bookCoverPreview").src = selectedBookCoverUrl; 
+        $("bookCoverPreview").classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
     });
 
     $("bookForm").addEventListener("submit", async event => {
@@ -1244,16 +1215,13 @@
       saveBtn.textContent = "publishing…";
       
       try {
-        let coverUrl = "", coverPath = "";
-        if (selectedBookCover) { 
-          const uploaded = await uploadPhoto(selectedBookCover); 
-          coverUrl = uploaded.url; 
-          coverPath = uploaded.path; 
-        }
-        
         await addDoc(collection(db, "books"), { 
-          title, synopsis, link, coverUrl, coverPath, 
-          createdAt: serverTimestamp(), updatedAt: serverTimestamp() 
+          title, 
+          synopsis, 
+          link, 
+          coverUrl: selectedBookCoverUrl || "", 
+          createdAt: serverTimestamp(), 
+          updatedAt: serverTimestamp() 
         });
         
         toast("your book has been published ♡"); 
@@ -1273,10 +1241,6 @@
       
       try {
         await deleteDoc(doc(db, "books", book.id));
-        if (book.coverPath) {
-          try { await deleteObject(ref(storage, book.coverPath)); } 
-          catch (e) { console.error("Cover delete failed:", e); }
-        }
         toast("book deleted ♡");
       } catch (error) { 
         console.error(error); 
