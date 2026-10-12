@@ -9,22 +9,29 @@
   <style>
     :root {
       --bg: #fff8f5;
-      --paper: #ffffff;
       --pink: #f5b8c8;
       --pink-dark: #d96f91;
       --text: #493942;
       --muted: #9b8790;
-      --border: #f0dfe5;
-      --soft: #fff0f4;
+      --border: rgba(255, 255, 255, 0.6);
       --danger: #c94d67;
-      --shadow: 0 12px 35px rgba(116, 67, 84, .08);
+      --shadow: 0 8px 32px rgba(116, 67, 84, 0.08);
+      
+      /* Glass variables */
+      --glass-bg: rgba(255, 255, 255, 0.6);
+      --glass-blur: blur(20px) saturate(160%);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background: var(--bg);
+      /* Soft mesh gradient background fixed to the viewport for the glass to glide over */
+      background: 
+        radial-gradient(circle at top left, #ffe4ec 0%, transparent 45%),
+        radial-gradient(circle at bottom right, #ffeeda 0%, transparent 40%),
+        var(--bg);
+      background-attachment: fixed;
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       min-height: 100vh;
@@ -33,7 +40,7 @@
     button, input, textarea, select { font: inherit; }
     button { cursor: pointer; }
     button:focus-visible, input:focus-visible, textarea:focus-visible {
-      outline: 3px solid #f4b5c8;
+      outline: 3px solid rgba(244, 181, 200, 0.8);
       outline-offset: 2px;
     }
 
@@ -44,10 +51,6 @@
       display: grid;
       place-items: center;
       padding: 22px;
-      background:
-        radial-gradient(ellipse at top left, #ffe4ec 0, transparent 45%),
-        radial-gradient(ellipse at bottom right, #ffeeda 0, transparent 40%),
-        var(--bg);
     }
 
     .login-card {
@@ -56,7 +59,9 @@
       padding: 32px 24px;
       border: 1px solid var(--border);
       border-radius: 28px;
-      background: rgba(255,255,255,.94);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       box-shadow: var(--shadow);
       text-align: center;
     }
@@ -77,26 +82,44 @@
       margin: 12px 0;
       border: 1px solid var(--border);
       border-radius: 13px;
-      background: #fffdfd;
+      background: rgba(255, 255, 255, 0.5);
       color: var(--text);
       min-width: 0;
+      transition: background 0.2s;
+    }
+    
+    .field:focus {
+      background: rgba(255, 255, 255, 0.8);
     }
 
     .btn {
-      border: 0;
+      border: 1px solid rgba(255, 255, 255, 0.4);
       border-radius: 13px;
       padding: 12px 16px;
       background: var(--pink);
       color: #603647;
       font-weight: 650;
-      transition: transform .15s, opacity .15s;
+      transition: transform .15s, opacity .15s, background .2s;
     }
 
     .btn:active { transform: scale(.98); }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-primary { background: var(--pink-dark); color: white; }
-    .btn-light { background: var(--soft); }
-    .btn-danger { background: #fff0f0; color: var(--danger); }
+    .btn-primary { background: var(--pink-dark); color: white; border-color: rgba(0,0,0,0.05); }
+    
+    .btn-light { 
+      background: rgba(255, 240, 244, 0.65); 
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .btn-light:hover { background: rgba(255, 240, 244, 0.85); }
+    
+    .btn-danger { 
+      background: rgba(255, 240, 240, 0.7); 
+      color: var(--danger); 
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    
     .btn-block { width: 100%; margin-top: 8px; }
     .btn-small { padding: 8px 11px; font-size: 13px; }
 
@@ -112,9 +135,10 @@
     .topbar {
       position: sticky;
       top: 0;
-      z-index: 5;
-      background: rgba(255,248,245,.92);
-      backdrop-filter: blur(15px);
+      z-index: 10;
+      background: rgba(255, 248, 245, 0.65);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border-bottom: 1px solid var(--border);
       padding: 14px max(16px, env(safe-area-inset-left));
     }
@@ -148,7 +172,9 @@
       position: sticky;
       top: 83px;
       border: 1px solid var(--border);
-      background: var(--paper);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border-radius: 20px;
       padding: 17px;
       box-shadow: var(--shadow);
@@ -175,19 +201,24 @@
       color: var(--text);
       padding: 11px 10px;
       margin: 2px 0;
+      transition: background 0.2s;
     }
 
-    .nav-item.active, .nav-item:hover { background: var(--soft); }
+    .nav-item.active, .nav-item:hover { background: rgba(255, 240, 244, 0.7); }
     .folder-list { display: grid; gap: 3px; }
     .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .content { min-width: 0; }
+    
     .hero {
       padding: 22px;
-      background: linear-gradient(125deg, #ffe5ec, #fff1e6);
-      border: 1px solid #f6dbe3;
+      background: linear-gradient(125deg, rgba(255,229,236,0.6), rgba(255,241,230,0.6));
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border);
       border-radius: 23px;
       margin-bottom: 22px;
+      box-shadow: var(--shadow);
     }
 
     .hero h2 { font-size: 23px; letter-spacing: -.7px; margin-bottom: 7px; }
@@ -204,7 +235,10 @@
       min-width: 58px;
       padding: 10px 12px;
       text-align: center;
-      background: rgba(255,255,255,.72);
+      background: rgba(255,255,255,0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.6);
       border-radius: 12px;
     }
 
@@ -232,9 +266,11 @@
       min-width: 0;
       border: 1px solid var(--border);
       border-radius: 18px;
-      background: white;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       padding: 16px;
-      box-shadow: 0 5px 18px rgba(116,67,84,.04);
+      box-shadow: var(--shadow);
       overflow-wrap: anywhere;
     }
 
@@ -256,7 +292,7 @@
       object-fit: cover;
       border-radius: 12px;
       margin: 10px 0;
-      background: var(--soft);
+      background: rgba(255,255,255,0.3);
     }
 
     .note-meta {
@@ -269,15 +305,19 @@
     .empty {
       padding: 36px 18px;
       text-align: center;
-      border: 1px dashed #e9cbd5;
+      border: 1px solid rgba(255, 255, 255, 0.4);
       border-radius: 18px;
-      background: rgba(255,255,255,.6);
+      background: rgba(255,255,255,.4);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       color: var(--muted);
       grid-column: 1 / -1;
     }
 
     .editor {
-      background: white;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border);
       border-radius: 20px;
       padding: 20px;
@@ -302,7 +342,10 @@
       margin: 0 0 16px;
       padding: 10px 13px;
       border-radius: 12px;
-      background: #fff0f4;
+      background: rgba(255, 240, 244, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
       color: #8d4b64;
       font-size: 12px;
       line-height: 1.5;
@@ -310,7 +353,10 @@
 
     .guest-banner {
       padding: 10px 14px;
-      background: #fff1d9;
+      background: rgba(255, 241, 217, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.5);
       color: #7c5b2e;
       font-size: 12px;
       text-align: center;
@@ -329,7 +375,10 @@
       bottom: calc(20px + env(safe-area-inset-bottom));
       transform: translateX(-50%);
       z-index: 20;
-      background: #503541;
+      background: rgba(80, 53, 65, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.1);
       color: white;
       border-radius: 14px;
       padding: 12px 16px;
@@ -422,7 +471,7 @@
       </aside>
 
       <main class="content">
-        <!-- NOTES PAGE CONTENT (Existing) -->
+        <!-- NOTES PAGE CONTENT -->
         <div id="notesPage">
           <section class="hero">
             <h2>our little forever ♡</h2>
@@ -473,13 +522,16 @@
               <h2 id="listHeading">all our notes</h2>
               <p id="noteCount">little thoughts we want to keep.</p>
             </div>
-            <button class="btn btn-light btn-small" id="refreshButton">refresh</button>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-danger btn-small hidden" id="deleteFolderButton">delete folder</button>
+              <button class="btn btn-light btn-small" id="refreshButton">refresh</button>
+            </div>
           </div>
 
           <div id="noteGrid" class="note-grid"></div>
         </div>
         
-        <!-- BOOKS PAGE CONTENT (New) -->
+        <!-- BOOKS PAGE CONTENT -->
         <div id="booksPage" class="hidden">
           <div class="section-head">
             <div>
@@ -550,19 +602,14 @@
     const storage = getStorage(app);
 
     isSupported()
-      .then(supported => {
-        if (supported) getAnalytics(app);
-      })
+      .then(supported => { if (supported) getAnalytics(app); })
       .catch(error => console.warn("Analytics unavailable:", error));
 
     const ANNIVERSARY_MONTH = 4;
     const ANNIVERSARY_DAY = 19;
     const ANNIVERSARY_START_YEAR = 2025;
 
-    const DEMO_USERS = {
-      ronan: "Admin123",
-      rhy: "Admin123"
-    };
+    const DEMO_USERS = { ronan: "Admin123", rhy: "Admin123" };
 
     const NOTES_CACHE = "notes_local_notes_v2";
     const FOLDERS_CACHE = "notes_local_folders_v2";
@@ -576,25 +623,14 @@
     ];
 
     const state = {
-      user: null,
-      guest: false,
-      view: "all",
-      folderId: null,
+      user: null, guest: false, view: "all", folderId: null,
       notes: readCache(NOTES_CACHE, SAMPLE_NOTES),
       folders: readCache(FOLDERS_CACHE, DEFAULT_FOLDERS),
       books: readCache(BOOKS_CACHE, []),
-      editingId: null,
-      selectedPhoto: null,
-      selectedPhotoUrl: null,
-      unsubscribeNotes: null,
-      unsubscribeFolders: null,
-      unsubscribeBooks: null,
-      cloudNotesReady: false,
-      cloudFoldersReady: false,
-      cloudBooksReady: false,
-      cloudNotesError: false,
-      cloudFoldersError: false,
-      cloudBooksError: false
+      editingId: null, selectedPhoto: null, selectedPhotoUrl: null,
+      unsubscribeNotes: null, unsubscribeFolders: null, unsubscribeBooks: null,
+      cloudNotesReady: false, cloudFoldersReady: false, cloudBooksReady: false,
+      cloudNotesError: false, cloudFoldersError: false, cloudBooksError: false
     };
 
     const $ = id => document.getElementById(id);
@@ -603,9 +639,7 @@
       try {
         const value = localStorage.getItem(key);
         return value ? JSON.parse(value) : fallback;
-      } catch {
-        return fallback;
-      }
+      } catch { return fallback; }
     }
 
     function saveCache() {
@@ -613,18 +647,12 @@
         localStorage.setItem(NOTES_CACHE, JSON.stringify(state.notes));
         localStorage.setItem(FOLDERS_CACHE, JSON.stringify(state.folders));
         localStorage.setItem(BOOKS_CACHE, JSON.stringify(state.books));
-      } catch (error) {
-        console.warn("Could not save local cache:", error);
-      }
+      } catch (error) { console.warn("Could not save local cache:", error); }
     }
 
     function escapeHTML(value = "") {
       return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
       })[char]);
     }
 
@@ -636,18 +664,12 @@
       toast.timer = setTimeout(() => el.classList.add("hidden"), 3000);
     }
 
-    function setNotice(message) {
-      $("statusNotice").textContent = message;
-    }
-
-    function canEdit() {
-      return Boolean(state.user) && !state.guest;
-    }
+    function setNotice(message) { $("statusNotice").textContent = message; }
+    function canEdit() { return Boolean(state.user) && !state.guest; }
 
     function sortNewest(items) {
       return [...items].sort((a, b) =>
-        Number(b.updatedAt || b.createdAt || 0) -
-        Number(a.updatedAt || a.createdAt || 0)
+        Number(b.updatedAt || b.createdAt || 0) - Number(a.updatedAt || a.createdAt || 0)
       );
     }
 
@@ -655,9 +677,7 @@
       if (!timestamp) return "just now";
       const date = new Date(Number(timestamp));
       if (Number.isNaN(date.getTime())) return "just now";
-      return date.toLocaleDateString(undefined, {
-        year: "numeric", month: "short", day: "numeric"
-      });
+      return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
     }
 
     function updatePageVisibility() {
@@ -674,18 +694,12 @@
       }
       
       document.querySelectorAll("[data-view]").forEach(button => {
-        button.classList.toggle(
-          "active",
-          button.dataset.view === state.view && state.view !== "folder"
-        );
+        button.classList.toggle("active", button.dataset.view === state.view && state.view !== "folder");
       });
     }
 
     function openApp({ user = null, guest = false }) {
-      state.user = user;
-      state.guest = guest;
-      state.view = "all";
-
+      state.user = user; state.guest = guest; state.view = "all";
       $("loginPage").classList.add("hidden");
       $("appPage").classList.remove("hidden");
       $("guestBanner").classList.toggle("hidden", !guest);
@@ -703,26 +717,17 @@
       if (state.unsubscribeFolders) state.unsubscribeFolders();
       if (state.unsubscribeBooks) state.unsubscribeBooks();
 
-      state.unsubscribeNotes = null;
-      state.unsubscribeFolders = null;
-      state.unsubscribeBooks = null;
-      state.user = null;
-      state.guest = false;
-      state.view = "all";
-      state.folderId = null;
-      state.cloudNotesReady = false;
-      state.cloudFoldersReady = false;
-      state.cloudBooksReady = false;
+      state.unsubscribeNotes = null; state.unsubscribeFolders = null; state.unsubscribeBooks = null;
+      state.user = null; state.guest = false; state.view = "all"; state.folderId = null;
+      state.cloudNotesReady = false; state.cloudFoldersReady = false; state.cloudBooksReady = false;
 
       $("appPage").classList.add("hidden");
       $("loginPage").classList.remove("hidden");
-      $("password").value = "";
-      $("loginError").textContent = "";
+      $("password").value = ""; $("loginError").textContent = "";
     }
 
     $("loginForm").addEventListener("submit", event => {
       event.preventDefault();
-
       const username = $("username").value.trim();
       const password = $("password").value;
       const key = username.toLowerCase();
@@ -743,37 +748,24 @@
       if (state.unsubscribeFolders) state.unsubscribeFolders();
       if (state.unsubscribeBooks) state.unsubscribeBooks();
 
-      state.cloudNotesReady = false;
-      state.cloudFoldersReady = false;
-      state.cloudBooksReady = false;
+      state.cloudNotesReady = false; state.cloudFoldersReady = false; state.cloudBooksReady = false;
       setNotice("Connecting to your shared notes…");
 
       state.unsubscribeNotes = onSnapshot(
         collection(db, "notes"),
         snapshot => {
-          state.notes = snapshot.docs.map(item => {
-            const data = item.data();
-            return {
-              id: item.id,
-              title: data.title || "",
-              body: data.body || "",
-              folderId: data.folderId || "",
-              photoUrl: data.photoUrl || "",
-              photoPath: data.photoPath || "",
-              favorite: Boolean(data.favorite),
-              createdAt: data.createdAt?.toMillis?.() || Number(data.createdAt) || Date.now(),
-              updatedAt: data.updatedAt?.toMillis?.() || Number(data.updatedAt) || Date.now()
-            };
-          });
-          state.cloudNotesReady = true;
-          saveCache();
+          state.notes = snapshot.docs.map(item => ({
+            id: item.id, ...item.data(),
+            createdAt: item.data().createdAt?.toMillis?.() || Date.now(),
+            updatedAt: item.data().updatedAt?.toMillis?.() || Date.now()
+          }));
+          state.cloudNotesReady = true; saveCache();
           if (state.view !== "books") renderNotes();
           updateStatus();
         },
         error => {
           console.error("Notes sync error:", error);
-          state.cloudNotesError = true;
-          state.cloudNotesReady = false;
+          state.cloudNotesError = true; state.cloudNotesReady = false;
           if (state.view !== "books") renderNotes();
           updateStatus();
         }
@@ -782,22 +774,14 @@
       state.unsubscribeFolders = onSnapshot(
         collection(db, "folders"),
         snapshot => {
-          state.folders = snapshot.docs.map(item => ({
-            id: item.id,
-            name: item.data().name || "untitled folder"
-          }));
-          state.cloudFoldersReady = true;
-          saveCache();
-          if (state.view !== "books") {
-            renderFolders();
-            renderNotes();
-          }
+          state.folders = snapshot.docs.map(item => ({ id: item.id, name: item.data().name || "untitled folder" }));
+          state.cloudFoldersReady = true; saveCache();
+          if (state.view !== "books") { renderFolders(); renderNotes(); }
           updateStatus();
         },
         error => {
           console.error("Folder sync error:", error);
-          state.cloudFoldersError = true;
-          state.cloudFoldersReady = false;
+          state.cloudFoldersError = true; state.cloudFoldersReady = false;
           if (state.view !== "books") renderFolders();
           updateStatus();
         }
@@ -806,27 +790,17 @@
       state.unsubscribeBooks = onSnapshot(
         collection(db, "books"),
         snapshot => {
-          state.books = snapshot.docs.map(item => {
-            const data = item.data();
-            return {
-              id: item.id,
-              title: data.title || "",
-              synopsis: data.synopsis || "",
-              link: data.link || "",
-              coverUrl: data.coverUrl || "",
-              coverPath: data.coverPath || "",
-              createdAt: data.createdAt?.toMillis?.() || Number(data.createdAt) || Date.now(),
-              updatedAt: data.updatedAt?.toMillis?.() || Number(data.updatedAt) || Date.now()
-            };
-          });
-          state.cloudBooksReady = true;
-          saveCache();
+          state.books = snapshot.docs.map(item => ({
+            id: item.id, ...item.data(),
+            createdAt: item.data().createdAt?.toMillis?.() || Date.now(),
+            updatedAt: item.data().updatedAt?.toMillis?.() || Date.now()
+          }));
+          state.cloudBooksReady = true; saveCache();
           if (state.view === "books") renderBooks();
         },
         error => {
           console.error("Books sync error:", error);
-          state.cloudBooksError = true;
-          state.cloudBooksReady = false;
+          state.cloudBooksError = true; state.cloudBooksReady = false;
           if (state.view === "books") renderBooks();
         }
       );
@@ -836,10 +810,7 @@
       if (state.cloudNotesReady && state.cloudFoldersReady) {
         setNotice("Your notes are synced with Firebase ♡");
       } else if (state.cloudNotesError || state.cloudFoldersError) {
-        setNotice(
-          "Firebase sync is unavailable. Check your Firestore rules and connection. " +
-          "Your cached notes may still be visible on this device."
-        );
+        setNotice("Firebase sync is unavailable. Your cached notes may still be visible.");
       } else {
         setNotice("Syncing your notes…");
       }
@@ -848,25 +819,18 @@
     function renderFolders() {
       const list = $("folderList");
       list.innerHTML = "";
-
       if (!state.folders.length) {
         list.innerHTML = '<p class="subtitle" style="font-size:12px">no folders yet.</p>';
       }
 
       state.folders.forEach(folder => {
         const button = document.createElement("button");
-        button.className = "nav-item" +
-          (state.view === "folder" && state.folderId === folder.id ? " active" : "");
-        button.innerHTML =
-          `<span class="folder-name">♡ ${escapeHTML(folder.name)}</span>` +
-          `<span>›</span>`;
-
+        button.className = "nav-item" + (state.view === "folder" && state.folderId === folder.id ? " active" : "");
+        button.innerHTML = `<span class="folder-name">♡ ${escapeHTML(folder.name)}</span><span>›</span>`;
         button.addEventListener("click", () => {
-          state.view = "folder";
-          state.folderId = folder.id;
+          state.view = "folder"; state.folderId = folder.id;
           updatePageVisibility();
         });
-
         list.appendChild(button);
       });
       
@@ -874,31 +838,44 @@
       $("addFolderButton").classList.toggle("hidden", !canEdit());
     }
 
-    async function createFolder() {
+    $("addFolderButton").addEventListener("click", async () => {
       if (!canEdit()) return;
-
       const name = prompt("what should we call this folder?");
       if (!name || !name.trim()) return;
 
       try {
-        await addDoc(collection(db, "folders"), {
-          name: name.trim(),
-          createdAt: serverTimestamp()
-        });
+        await addDoc(collection(db, "folders"), { name: name.trim(), createdAt: serverTimestamp() });
         toast("folder created ♡");
       } catch (error) {
-        console.error(error);
-        toast("could not create folder. check Firebase permissions.");
+        console.error(error); toast("could not create folder. check Firebase permissions.");
       }
-    }
+    });
+    
+    // DELETE FOLDER LOGIC
+    $("deleteFolderButton").addEventListener("click", async () => {
+      if (!canEdit() || !state.folderId) return;
+      const folder = state.folders.find(f => f.id === state.folderId);
+      if (!folder) return;
+      
+      const confirmed = confirm(`delete folder "${folder.name}"?\nyour notes inside won't be deleted, but they won't be in this folder anymore.`);
+      if (!confirmed) return;
 
-    $("addFolderButton").addEventListener("click", createFolder);
+      try {
+        await deleteDoc(doc(db, "folders", state.folderId));
+        toast("folder deleted ♡");
+        state.view = "all";
+        state.folderId = null;
+        updatePageVisibility();
+      } catch (e) {
+        console.error("Could not delete folder:", e);
+        toast("failed to delete folder.");
+      }
+    });
 
     document.querySelectorAll("[data-view]").forEach(button => {
       button.addEventListener("click", () => {
         if (button.dataset.view !== "folder") {
-            state.view = button.dataset.view;
-            state.folderId = null;
+            state.view = button.dataset.view; state.folderId = null;
             updatePageVisibility();
         }
       });
@@ -906,11 +883,8 @@
 
     function getVisibleNotes() {
       let notes = sortNewest(state.notes);
-      if (state.view === "favorites") {
-        notes = notes.filter(note => note.favorite);
-      } else if (state.view === "folder") {
-        notes = notes.filter(note => note.folderId === state.folderId);
-      }
+      if (state.view === "favorites") notes = notes.filter(n => n.favorite);
+      else if (state.view === "folder") notes = notes.filter(n => n.folderId === state.folderId);
       return notes;
     }
 
@@ -921,425 +895,219 @@
       const notes = getVisibleNotes();
       const folder = state.folders.find(item => item.id === state.folderId);
 
-      $("listHeading").textContent =
-        state.view === "favorites" ? "our favorite notes" :
-        state.view === "folder" ? (folder?.name || "folder notes") :
-        "all our notes";
-
-      $("noteCount").textContent =
-        `${notes.length} ${notes.length === 1 ? "note" : "notes"} to keep close ♡`;
+      $("listHeading").textContent = state.view === "favorites" ? "our favorite notes" :
+        state.view === "folder" ? (folder?.name || "folder notes") : "all our notes";
+      $("noteCount").textContent = `${notes.length} ${notes.length === 1 ? "note" : "notes"} to keep close ♡`;
+      
+      // Manage Delete Folder button visibility
+      const delFolderBtn = $("deleteFolderButton");
+      if (delFolderBtn) {
+        delFolderBtn.classList.toggle("hidden", state.view !== "folder" || !canEdit());
+      }
 
       grid.innerHTML = "";
-
       if (!notes.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty";
-        empty.innerHTML = `
-          <div style="font-size:30px;margin-bottom:8px">♡</div>
-          <strong>nothing here just yet</strong>
-          <p style="margin:8px 0 0;font-size:13px">make a little memory of your own.</p>
-        `;
-        grid.appendChild(empty);
-        return;
+        const empty = document.createElement("div"); empty.className = "empty";
+        empty.innerHTML = `<div style="font-size:30px;margin-bottom:8px">♡</div><strong>nothing here just yet</strong><p style="margin:8px 0 0;font-size:13px">make a little memory of your own.</p>`;
+        grid.appendChild(empty); return;
       }
 
       notes.forEach(note => {
-        const card = document.createElement("article");
-        card.className = "note-card";
+        const card = document.createElement("article"); card.className = "note-card";
+        const photo = note.photoUrl ? `<img class="note-photo" src="${escapeHTML(note.photoUrl)}" alt="Photo attached" loading="lazy">` : "";
+        const favBtn = canEdit() ? `<button class="btn btn-light btn-small" data-action="favorite">${note.favorite ? "♥ saved" : "♡ favorite"}</button>` : "";
+        const editBtn = canEdit() ? `<button class="btn btn-light btn-small" data-action="edit">edit</button>` : "";
+        const delBtn = canEdit() ? `<button class="btn btn-danger btn-small" data-action="delete">delete</button>` : "";
 
-        const photo = note.photoUrl
-          ? `<img class="note-photo" src="${escapeHTML(note.photoUrl)}" alt="Photo attached to ${escapeHTML(note.title)}" loading="lazy">`
-          : "";
-
-        const favoriteButton = canEdit()
-          ? `<button class="btn btn-light btn-small" data-action="favorite">${note.favorite ? "♥ saved" : "♡ favorite"}</button>`
-          : "";
-
-        const editButton = canEdit()
-          ? `<button class="btn btn-light btn-small" data-action="edit">edit</button>`
-          : "";
-
-        const deleteButton = canEdit()
-          ? `<button class="btn btn-danger btn-small" data-action="delete">delete</button>`
-          : "";
-
-        card.innerHTML = `
-          <h3>${escapeHTML(note.title || "untitled note")}</h3>
-          ${photo}
-          <div class="note-preview">${escapeHTML(note.body || "")}</div>
-          <div class="note-meta">${escapeHTML(formatDate(note.updatedAt))}</div>
-          <div class="card-actions">
-            ${favoriteButton}
-            ${editButton}
-            ${deleteButton}
-          </div>
-        `;
-
+        card.innerHTML = `<h3>${escapeHTML(note.title || "untitled note")}</h3>${photo}<div class="note-preview">${escapeHTML(note.body || "")}</div><div class="note-meta">${escapeHTML(formatDate(note.updatedAt))}</div><div class="card-actions">${favBtn}${editBtn}${delBtn}</div>`;
         card.querySelector('[data-action="favorite"]')?.addEventListener("click", () => toggleFavorite(note));
-        card.querySelector('[data-action="edit"]')?.addEventListener("click", () => editNote(note));
+        card.querySelector('[data-action="edit"]')?.addEventListener("click", () => showEditor(note));
         card.querySelector('[data-action="delete"]')?.addEventListener("click", () => deleteNote(note));
-
         grid.appendChild(card);
       });
     }
 
     function populateFolderSelect(selectedId = "") {
-      const select = $("noteFolder");
-      select.innerHTML = '<option value="">no folder</option>';
-      state.folders.forEach(folder => {
-        const option = document.createElement("option");
-        option.value = folder.id;
-        option.textContent = folder.name;
-        select.appendChild(option);
+      const select = $("noteFolder"); select.innerHTML = '<option value="">no folder</option>';
+      state.folders.forEach(f => {
+        const option = document.createElement("option"); option.value = f.id; option.textContent = f.name; select.appendChild(option);
       });
       select.value = selectedId;
     }
 
     function clearPhotoSelection() {
-      state.selectedPhoto = null;
-      state.selectedPhotoUrl = null;
-      $("notePhoto").value = "";
-      $("photoPreview").src = "";
-      $("photoPreview").classList.add("hidden");
+      state.selectedPhoto = null; state.selectedPhotoUrl = null;
+      $("notePhoto").value = ""; $("photoPreview").src = ""; $("photoPreview").classList.add("hidden");
     }
 
     function showEditor(note = null) {
       if (!canEdit()) return;
-      state.editingId = note?.id || null;
-      clearPhotoSelection();
-
+      state.editingId = note?.id || null; clearPhotoSelection();
       $("editorHeading").textContent = note ? "edit your note ♡" : "a new little thought ♡";
-      $("noteTitle").value = note?.title || "";
-      $("noteBody").value = note?.body || "";
+      $("noteTitle").value = note?.title \vert{}\vert{} ""; $("noteBody").value = note?.body || "";
       populateFolderSelect(note?.folderId || "");
       $("saveNoteButton").textContent = note ? "save changes ♡" : "save note ♡";
       $("editor").classList.remove("hidden");
-
       if (note?.photoUrl) {
-        state.selectedPhotoUrl = note.photoUrl;
-        $("photoPreview").src = note.photoUrl;
-        $("photoPreview").classList.remove("hidden");
+        state.selectedPhotoUrl = note.photoUrl; $("photoPreview").src = note.photoUrl; $("photoPreview").classList.remove("hidden");
       }
-
       $("editor").scrollIntoView({ behavior: "smooth", block: "start" });
       $("noteTitle").focus({ preventScroll: true });
     }
 
-    function hideEditor() {
-      $("editor").classList.add("hidden");
-      $("noteForm").reset();
-      state.editingId = null;
-      clearPhotoSelection();
-    }
-
     $("newNoteButton").addEventListener("click", () => showEditor());
-    $("cancelEditorButton").addEventListener("click", hideEditor);
+    $("cancelEditorButton").addEventListener("click", () => { $("editor").classList.add("hidden"); $("noteForm").reset(); state.editingId = null; clearPhotoSelection(); });
 
     $("notePhoto").addEventListener("change", () => {
-      const file = $("notePhoto").files?.[0];
-      if (!file) return;
-
-      if (!file.type.startsWith("image/")) {
-        toast("please choose an image file.");
-        $("notePhoto").value = "";
-        return;
-      }
-      if (file.size > 8 * 1024 * 1024) {
-        toast("please choose a photo smaller than 8 MB.");
-        $("notePhoto").value = "";
-        return;
-      }
-
+      const file = $("notePhoto").files?.[0]; if (!file) return;
+      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) { toast("please choose an image smaller than 8 MB."); $("notePhoto").value = ""; return; }
       state.selectedPhoto = file;
       if (state.selectedPhotoUrl?.startsWith("blob:")) URL.revokeObjectURL(state.selectedPhotoUrl);
       state.selectedPhotoUrl = URL.createObjectURL(file);
-      $("photoPreview").src = state.selectedPhotoUrl;
-      $("photoPreview").classList.remove("hidden");
+      $("photoPreview").src = state.selectedPhotoUrl; $("photoPreview").classList.remove("hidden");
     });
 
     async function uploadPhoto(file) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `photos/${Date.now()}_${safeName}`;
-      const photoRef = ref(storage, path);
+      const path = `photos/${Date.now()}_${safeName}`; const photoRef = ref(storage, path);
       await uploadBytes(photoRef, file, { contentType: file.type });
-      const url = await getDownloadURL(photoRef);
-      return { url, path };
+      return { url: await getDownloadURL(photoRef), path };
     }
 
     $("noteForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      if (!canEdit()) return;
+      event.preventDefault(); if (!canEdit()) return;
+      const title = $("noteTitle").value.trim(), body = $("noteBody").value.trim();
+      if (!title || !body) { toast("please add a title and your note."); return; }
 
-      const title = $("noteTitle").value.trim();
-      const body = $("noteBody").value.trim();
-
-      if (!title || !body) {
-        toast("please add a title and your note.");
-        return;
-      }
-
-      const saveButton = $("saveNoteButton");
-      saveButton.disabled = true;
-      saveButton.textContent = "saving…";
-
-      const oldNote = state.notes.find(note => note.id === state.editingId);
-      let photoUrl = oldNote?.photoUrl || state.selectedPhotoUrl || "";
-      let photoPath = oldNote?.photoPath || "";
+      const saveButton = $("saveNoteButton"); saveButton.disabled = true; saveButton.textContent = "saving…";
+      const oldNote = state.notes.find(n => n.id === state.editingId);
+      let photoUrl = oldNote?.photoUrl || state.selectedPhotoUrl || "", photoPath = oldNote?.photoPath || "";
 
       try {
         if (state.selectedPhoto) {
           const uploaded = await uploadPhoto(state.selectedPhoto);
-          photoUrl = uploaded.url;
-          photoPath = uploaded.path;
+          photoUrl = uploaded.url; photoPath = uploaded.path;
         }
-
-        const data = {
-          title, body, folderId: $("noteFolder").value || "",
-          photoUrl, photoPath, favorite: Boolean(oldNote?.favorite),
-          updatedAt: serverTimestamp()
-        };
-
-        if (state.editingId) {
-          await updateDoc(doc(db, "notes", state.editingId), data);
-          toast("your note has been updated ♡");
-        } else {
-          await addDoc(collection(db, "notes"), {
-            ...data, createdAt: serverTimestamp()
-          });
-          toast("your note has been saved ♡");
-        }
-        hideEditor();
-      } catch (error) {
-        console.error("Could not save note:", error);
-        toast("could not save. check your connection and Firebase permissions.");
-      } finally {
-        saveButton.disabled = false;
-        saveButton.textContent = state.editingId ? "save changes ♡" : "save note ♡";
-      }
+        const data = { title, body, folderId: $("noteFolder").value || "", photoUrl, photoPath, favorite: Boolean(oldNote?.favorite), updatedAt: serverTimestamp() };
+        if (state.editingId) { await updateDoc(doc(db, "notes", state.editingId), data); toast("your note has been updated ♡"); }
+        else { await addDoc(collection(db, "notes"), { ...data, createdAt: serverTimestamp() }); toast("your note has been saved ♡"); }
+        $("cancelEditorButton").click();
+      } catch (error) { console.error(error); toast("could not save. check your connection."); }
+      finally { saveButton.disabled = false; saveButton.textContent = state.editingId ? "save changes ♡" : "save note ♡"; }
     });
-
-    function editNote(note) { showEditor(note); }
 
     async function toggleFavorite(note) {
       if (!canEdit()) return;
-      try {
-        await updateDoc(doc(db, "notes", note.id), {
-          favorite: !note.favorite, updatedAt: serverTimestamp()
-        });
-      } catch (error) {
-        console.error(error);
-        toast("could not update favorite. check Firebase permissions.");
-      }
+      try { await updateDoc(doc(db, "notes", note.id), { favorite: !note.favorite, updatedAt: serverTimestamp() }); }
+      catch (error) { console.error(error); toast("could not update favorite."); }
     }
 
     async function deleteNote(note) {
       if (!canEdit()) return;
-      const confirmed = confirm(`delete "${note.title}"? this cannot be undone.`);
-      if (!confirmed) return;
-
+      if (!confirm(`delete "${note.title}"? this cannot be undone.`)) return;
       try {
         await deleteDoc(doc(db, "notes", note.id));
-        if (note.photoPath) {
-          try { await deleteObject(ref(storage, note.photoPath)); }
-          catch (e) { console.warn("Photo could not be deleted:", e); }
-        }
+        if (note.photoPath) try { await deleteObject(ref(storage, note.photoPath)); } catch (e) {}
         toast("note deleted ♡");
-      } catch (error) {
-        console.error("Note deletion failed:", error);
-        toast("deletion failed. check Firebase Firestore rules and try again.");
-      }
+      } catch (error) { console.error(error); toast("deletion failed."); }
     }
     
     // ==========================================================
-    // BOOKS LOGIC
+    // BOOKS LOGIC (With delete included)
     // ==========================================================
     
     function renderBooks() {
-      const grid = $("bookGrid");
-      if (!grid) return;
-      
-      grid.innerHTML = "";
-      const books = sortNewest(state.books);
+      const grid = $("bookGrid"); if (!grid) return;
+      grid.innerHTML = ""; const books = sortNewest(state.books);
 
       if (!books.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty";
-        empty.innerHTML = `
-          <div style="font-size:30px;margin-bottom:8px">📖</div>
-          <strong>no books published yet</strong>
-          <p style="margin:8px 0 0;font-size:13px">our library is waiting for its first story.</p>
-        `;
-        grid.appendChild(empty);
-        return;
+        const empty = document.createElement("div"); empty.className = "empty";
+        empty.innerHTML = `<div style="font-size:30px;margin-bottom:8px">📖</div><strong>no books published yet</strong><p style="margin:8px 0 0;font-size:13px">our library is waiting for its first story.</p>`;
+        grid.appendChild(empty); return;
       }
 
       books.forEach(book => {
-        const card = document.createElement("article");
-        card.className = "note-card";
-        
-        const cover = book.coverUrl 
-          ? `<img class="note-photo" src="${escapeHTML(book.coverUrl)}" alt="Cover of ${escapeHTML(book.title)}" loading="lazy">` 
-          : "";
-        
-        const readBtn = book.link 
-          ? `<a href="${escapeHTML(book.link)}" target="_blank" class="btn btn-light btn-small" style="text-decoration:none">read book</a>` 
-          : "";
-          
-        const delBtn = canEdit() 
-          ? `<button class="btn btn-danger btn-small" data-action="delete-book">delete</button>` 
-          : "";
+        const card = document.createElement("article"); card.className = "note-card";
+        const cover = book.coverUrl ? `<img class="note-photo" src="${escapeHTML(book.coverUrl)}" alt="Cover of ${escapeHTML(book.title)}" loading="lazy">` : "";
+        const readBtn = book.link ? `<a href="${escapeHTML(book.link)}" target="_blank" class="btn btn-light btn-small" style="text-decoration:none">read book</a>` : "";
+        const delBtn = canEdit() ? `<button class="btn btn-danger btn-small" data-action="delete-book">delete</button>` : "";
 
-        card.innerHTML = `
-          <h3>${escapeHTML(book.title)}</h3>
-          ${cover}
-          <div class="note-preview">${escapeHTML(book.synopsis)}</div>
-          <div class="note-meta">Published: ${escapeHTML(formatDate(book.createdAt))}</div>
-          <div class="card-actions" style="margin-top:14px">
-            ${readBtn}
-            ${delBtn}
-          </div>
-        `;
-        
+        card.innerHTML = `<h3>${escapeHTML(book.title)}</h3>${cover}<div class="note-preview">${escapeHTML(book.synopsis)}</div><div class="note-meta">Published: ${escapeHTML(formatDate(book.createdAt))}</div><div class="card-actions" style="margin-top:14px">${readBtn}${delBtn}</div>`;
         card.querySelector('[data-action="delete-book"]')?.addEventListener("click", () => deleteBook(book));
         grid.appendChild(card);
       });
     }
 
-    let selectedBookCover = null;
-    let selectedBookCoverUrl = null;
+    let selectedBookCover = null; let selectedBookCoverUrl = null;
 
     $("newBookButton").addEventListener("click", () => {
-      $("bookEditor").classList.remove("hidden");
-      $("bookTitle").focus({ preventScroll: true });
+      $("bookEditor").classList.remove("hidden"); $("bookTitle").focus({ preventScroll: true });
     });
 
     $("cancelBookButton").addEventListener("click", () => {
-      $("bookEditor").classList.add("hidden");
-      $("bookForm").reset();
+      $("bookEditor").classList.add("hidden"); $("bookForm").reset();
       selectedBookCover = null;
       if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
-      selectedBookCoverUrl = null;
-      $("bookCoverPreview").src = "";
-      $("bookCoverPreview").classList.add("hidden");
+      selectedBookCoverUrl = null; $("bookCoverPreview").src = ""; $("bookCoverPreview").classList.add("hidden");
     });
 
     $("bookCover").addEventListener("change", () => {
-      const file = $("bookCover").files?.[0];
-      if (!file) return;
-
-      if (!file.type.startsWith("image/")) {
-        toast("please choose an image file for the cover.");
-        $("bookCover").value = "";
-        return;
-      }
-
+      const file = $("bookCover").files?.[0]; if (!file) return;
+      if (!file.type.startsWith("image/")) { toast("please choose an image file for the cover."); $("bookCover").value = ""; return; }
       selectedBookCover = file;
       if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
       selectedBookCoverUrl = URL.createObjectURL(file);
-      $("bookCoverPreview").src = selectedBookCoverUrl;
-      $("bookCoverPreview").classList.remove("hidden");
+      $("bookCoverPreview").src = selectedBookCoverUrl; $("bookCoverPreview").classList.remove("hidden");
     });
 
     $("bookForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      if (!canEdit()) return;
+      event.preventDefault(); if (!canEdit()) return;
+      const title = $("bookTitle").value.trim(), synopsis = $("bookSynopsis").value.trim(), link = $("bookLink").value.trim();
+      if (!title || !synopsis) { toast("please add a title and synopsis."); return; }
 
-      const title = $("bookTitle").value.trim();
-      const synopsis = $("bookSynopsis").value.trim();
-      const link = $("bookLink").value.trim();
-
-      if (!title || !synopsis) {
-        toast("please add a title and synopsis.");
-        return;
-      }
-
-      const saveBtn = $("saveBookButton");
-      saveBtn.disabled = true;
-      saveBtn.textContent = "publishing…";
-
+      const saveBtn = $("saveBookButton"); saveBtn.disabled = true; saveBtn.textContent = "publishing…";
       try {
-        let coverUrl = "";
-        let coverPath = "";
-
-        if (selectedBookCover) {
-          const uploaded = await uploadPhoto(selectedBookCover);
-          coverUrl = uploaded.url;
-          coverPath = uploaded.path;
-        }
-
-        await addDoc(collection(db, "books"), {
-          title, synopsis, link, coverUrl, coverPath,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-
-        toast("your book has been published ♡");
-        $("cancelBookButton").click();
-      } catch (error) {
-        console.error("Could not save book:", error);
-        toast("could not publish. check your connection and permissions.");
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "publish book ♡";
-      }
+        let coverUrl = "", coverPath = "";
+        if (selectedBookCover) { const uploaded = await uploadPhoto(selectedBookCover); coverUrl = uploaded.url; coverPath = uploaded.path; }
+        await addDoc(collection(db, "books"), { title, synopsis, link, coverUrl, coverPath, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        toast("your book has been published ♡"); $("cancelBookButton").click();
+      } catch (error) { console.error(error); toast("could not publish. check connections."); }
+      finally { saveBtn.disabled = false; saveBtn.textContent = "publish book ♡"; }
     });
 
+    // Delete Book execution
     async function deleteBook(book) {
       if (!canEdit()) return;
-      const confirmed = confirm(`delete "${book.title}" from the library?`);
-      if (!confirmed) return;
-
+      if (!confirm(`delete "${book.title}" from the library?`)) return;
       try {
         await deleteDoc(doc(db, "books", book.id));
-        if (book.coverPath) {
-          try { await deleteObject(ref(storage, book.coverPath)); }
-          catch (e) { console.warn("Cover could not be deleted:", e); }
-        }
+        if (book.coverPath) try { await deleteObject(ref(storage, book.coverPath)); } catch (e) {}
         toast("book deleted ♡");
-      } catch (error) {
-        console.error("Book deletion failed:", error);
-        toast("deletion failed.");
-      }
+      } catch (error) { console.error(error); toast("deletion failed."); }
     }
 
     // ==========================================================
     // ANNIVERSARY & INIT
     // ==========================================================
     function getNextAnniversary(now) {
-      let year = now.getFullYear();
-      let target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
-      if (now >= target) {
-        year += 1;
-        target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
-      }
+      let year = now.getFullYear(), target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
+      if (now >= target) { year += 1; target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0); }
       return { target, year };
     }
 
     function updateAnniversary() {
-      const now = new Date();
-      const { target, year } = getNextAnniversary(now);
+      const now = new Date(); const { target, year } = getNextAnniversary(now);
       const diff = Math.max(0, target.getTime() - now.getTime());
-
       $("days").textContent = Math.floor(diff / 86400000);
       $("hours").textContent = Math.floor((diff % 86400000) / 3600000);
       $("minutes").textContent = Math.floor((diff % 3600000) / 60000);
       $("seconds").textContent = Math.floor((diff % 60000) / 1000);
-
       const yearsTogether = year - ANNIVERSARY_START_YEAR;
-      $("anniversaryCaption").textContent =
-        `counting down to May 19, ${year} · ${yearsTogether} year${yearsTogether === 1 ? "" : "s"} since our first anniversary ♡`;
+      $("anniversaryCaption").textContent = `counting down to May 19, ${year} · ${yearsTogether} year${yearsTogether === 1 ? "" : "s"} since our first anniversary ♡`;
     }
 
-    $("refreshButton").addEventListener("click", () => {
-      renderFolders();
-      renderNotes();
-      renderBooks();
-      toast("your page has been refreshed ♡");
-    });
-
-    updateAnniversary();
-    setInterval(updateAnniversary, 1000);
+    $("refreshButton").addEventListener("click", () => { renderFolders(); renderNotes(); renderBooks(); toast("your page has been refreshed ♡"); });
+    updateAnniversary(); setInterval(updateAnniversary, 1000);
   </script>
 </body>
 </html>
-
