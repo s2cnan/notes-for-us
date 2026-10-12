@@ -302,6 +302,7 @@
     }
 
     .card-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+    
     .empty {
       padding: 36px 18px;
       text-align: center;
@@ -576,16 +577,17 @@
 
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
 
+  <!-- FIXED FIREBASE VERSIONS HERE (12.0.0 DOES NOT EXIST YET, REPLACED WITH STABLE 10.14.1) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
     import {
       getFirestore, collection, doc, addDoc, updateDoc,
       deleteDoc, onSnapshot, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
     import {
       getStorage, ref, uploadBytes, getDownloadURL, deleteObject
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCoLVIagQV2nAoAqayU8UrkGGfWy7pQJbI",
@@ -602,14 +604,19 @@
     const storage = getStorage(app);
 
     isSupported()
-      .then(supported => { if (supported) getAnalytics(app); })
+      .then(supported => {
+        if (supported) getAnalytics(app);
+      })
       .catch(error => console.warn("Analytics unavailable:", error));
 
     const ANNIVERSARY_MONTH = 4;
     const ANNIVERSARY_DAY = 19;
     const ANNIVERSARY_START_YEAR = 2025;
 
-    const DEMO_USERS = { ronan: "Admin123", rhy: "Admin123" };
+    const DEMO_USERS = {
+      ronan: "Admin123",
+      rhy: "Admin123"
+    };
 
     const NOTES_CACHE = "notes_local_notes_v2";
     const FOLDERS_CACHE = "notes_local_folders_v2";
@@ -623,14 +630,25 @@
     ];
 
     const state = {
-      user: null, guest: false, view: "all", folderId: null,
+      user: null,
+      guest: false,
+      view: "all",
+      folderId: null,
       notes: readCache(NOTES_CACHE, SAMPLE_NOTES),
       folders: readCache(FOLDERS_CACHE, DEFAULT_FOLDERS),
       books: readCache(BOOKS_CACHE, []),
-      editingId: null, selectedPhoto: null, selectedPhotoUrl: null,
-      unsubscribeNotes: null, unsubscribeFolders: null, unsubscribeBooks: null,
-      cloudNotesReady: false, cloudFoldersReady: false, cloudBooksReady: false,
-      cloudNotesError: false, cloudFoldersError: false, cloudBooksError: false
+      editingId: null,
+      selectedPhoto: null,
+      selectedPhotoUrl: null,
+      unsubscribeNotes: null,
+      unsubscribeFolders: null,
+      unsubscribeBooks: null,
+      cloudNotesReady: false,
+      cloudFoldersReady: false,
+      cloudBooksReady: false,
+      cloudNotesError: false,
+      cloudFoldersError: false,
+      cloudBooksError: false
     };
 
     const $ = id => document.getElementById(id);
@@ -639,7 +657,9 @@
       try {
         const value = localStorage.getItem(key);
         return value ? JSON.parse(value) : fallback;
-      } catch { return fallback; }
+      } catch {
+        return fallback;
+      }
     }
 
     function saveCache() {
@@ -647,12 +667,18 @@
         localStorage.setItem(NOTES_CACHE, JSON.stringify(state.notes));
         localStorage.setItem(FOLDERS_CACHE, JSON.stringify(state.folders));
         localStorage.setItem(BOOKS_CACHE, JSON.stringify(state.books));
-      } catch (error) { console.warn("Could not save local cache:", error); }
+      } catch (error) {
+        console.warn("Could not save local cache:", error);
+      }
     }
 
     function escapeHTML(value = "") {
       return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
       })[char]);
     }
 
@@ -664,8 +690,13 @@
       toast.timer = setTimeout(() => el.classList.add("hidden"), 3000);
     }
 
-    function setNotice(message) { $("statusNotice").textContent = message; }
-    function canEdit() { return Boolean(state.user) && !state.guest; }
+    function setNotice(message) {
+      $("statusNotice").textContent = message;
+    }
+
+    function canEdit() {
+      return Boolean(state.user) && !state.guest;
+    }
 
     function sortNewest(items) {
       return [...items].sort((a, b) =>
@@ -699,7 +730,10 @@
     }
 
     function openApp({ user = null, guest = false }) {
-      state.user = user; state.guest = guest; state.view = "all";
+      state.user = user;
+      state.guest = guest;
+      state.view = "all";
+      
       $("loginPage").classList.add("hidden");
       $("appPage").classList.remove("hidden");
       $("guestBanner").classList.toggle("hidden", !guest);
@@ -717,17 +751,28 @@
       if (state.unsubscribeFolders) state.unsubscribeFolders();
       if (state.unsubscribeBooks) state.unsubscribeBooks();
 
-      state.unsubscribeNotes = null; state.unsubscribeFolders = null; state.unsubscribeBooks = null;
-      state.user = null; state.guest = false; state.view = "all"; state.folderId = null;
-      state.cloudNotesReady = false; state.cloudFoldersReady = false; state.cloudBooksReady = false;
+      state.unsubscribeNotes = null;
+      state.unsubscribeFolders = null;
+      state.unsubscribeBooks = null;
+      
+      state.user = null;
+      state.guest = false;
+      state.view = "all";
+      state.folderId = null;
+      
+      state.cloudNotesReady = false;
+      state.cloudFoldersReady = false;
+      state.cloudBooksReady = false;
 
       $("appPage").classList.add("hidden");
       $("loginPage").classList.remove("hidden");
-      $("password").value = ""; $("loginError").textContent = "";
+      $("password").value = "";
+      $("loginError").textContent = "";
     }
 
     $("loginForm").addEventListener("submit", event => {
       event.preventDefault();
+      
       const username = $("username").value.trim();
       const password = $("password").value;
       const key = username.toLowerCase();
@@ -748,8 +793,10 @@
       if (state.unsubscribeFolders) state.unsubscribeFolders();
       if (state.unsubscribeBooks) state.unsubscribeBooks();
 
-      state.cloudNotesReady = false; state.cloudFoldersReady = false; state.cloudBooksReady = false;
-      setNotice("Connecting to your shared notes…");
+      state.cloudNotesReady = false;
+      state.cloudFoldersReady = false;
+      state.cloudBooksReady = false;
+      setNotice("Connecting to your shared space…");
 
       state.unsubscribeNotes = onSnapshot(
         collection(db, "notes"),
@@ -759,13 +806,15 @@
             createdAt: item.data().createdAt?.toMillis?.() || Date.now(),
             updatedAt: item.data().updatedAt?.toMillis?.() || Date.now()
           }));
-          state.cloudNotesReady = true; saveCache();
+          state.cloudNotesReady = true;
+          saveCache();
           if (state.view !== "books") renderNotes();
           updateStatus();
         },
         error => {
           console.error("Notes sync error:", error);
-          state.cloudNotesError = true; state.cloudNotesReady = false;
+          state.cloudNotesError = true;
+          state.cloudNotesReady = false;
           if (state.view !== "books") renderNotes();
           updateStatus();
         }
@@ -774,14 +823,22 @@
       state.unsubscribeFolders = onSnapshot(
         collection(db, "folders"),
         snapshot => {
-          state.folders = snapshot.docs.map(item => ({ id: item.id, name: item.data().name || "untitled folder" }));
-          state.cloudFoldersReady = true; saveCache();
-          if (state.view !== "books") { renderFolders(); renderNotes(); }
+          state.folders = snapshot.docs.map(item => ({ 
+            id: item.id, 
+            name: item.data().name || "untitled folder" 
+          }));
+          state.cloudFoldersReady = true;
+          saveCache();
+          if (state.view !== "books") { 
+            renderFolders(); 
+            renderNotes(); 
+          }
           updateStatus();
         },
         error => {
           console.error("Folder sync error:", error);
-          state.cloudFoldersError = true; state.cloudFoldersReady = false;
+          state.cloudFoldersError = true;
+          state.cloudFoldersReady = false;
           if (state.view !== "books") renderFolders();
           updateStatus();
         }
@@ -795,12 +852,14 @@
             createdAt: item.data().createdAt?.toMillis?.() || Date.now(),
             updatedAt: item.data().updatedAt?.toMillis?.() || Date.now()
           }));
-          state.cloudBooksReady = true; saveCache();
+          state.cloudBooksReady = true;
+          saveCache();
           if (state.view === "books") renderBooks();
         },
         error => {
           console.error("Books sync error:", error);
-          state.cloudBooksError = true; state.cloudBooksReady = false;
+          state.cloudBooksError = true;
+          state.cloudBooksReady = false;
           if (state.view === "books") renderBooks();
         }
       );
@@ -828,7 +887,8 @@
         button.className = "nav-item" + (state.view === "folder" && state.folderId === folder.id ? " active" : "");
         button.innerHTML = `<span class="folder-name">♡ ${escapeHTML(folder.name)}</span><span>›</span>`;
         button.addEventListener("click", () => {
-          state.view = "folder"; state.folderId = folder.id;
+          state.view = "folder";
+          state.folderId = folder.id;
           updatePageVisibility();
         });
         list.appendChild(button);
@@ -847,11 +907,11 @@
         await addDoc(collection(db, "folders"), { name: name.trim(), createdAt: serverTimestamp() });
         toast("folder created ♡");
       } catch (error) {
-        console.error(error); toast("could not create folder. check Firebase permissions.");
+        console.error(error); 
+        toast("could not create folder. check Firebase permissions.");
       }
     });
     
-    // DELETE FOLDER LOGIC
     $("deleteFolderButton").addEventListener("click", async () => {
       if (!canEdit() || !state.folderId) return;
       const folder = state.folders.find(f => f.id === state.folderId);
@@ -875,7 +935,8 @@
     document.querySelectorAll("[data-view]").forEach(button => {
       button.addEventListener("click", () => {
         if (button.dataset.view !== "folder") {
-            state.view = button.dataset.view; state.folderId = null;
+            state.view = button.dataset.view;
+            state.folderId = null;
             updatePageVisibility();
         }
       });
@@ -897,9 +958,9 @@
 
       $("listHeading").textContent = state.view === "favorites" ? "our favorite notes" :
         state.view === "folder" ? (folder?.name || "folder notes") : "all our notes";
+      
       $("noteCount").textContent = `${notes.length} ${notes.length === 1 ? "note" : "notes"} to keep close ♡`;
       
-      // Manage Delete Folder button visibility
       const delFolderBtn = $("deleteFolderButton");
       if (delFolderBtn) {
         delFolderBtn.classList.toggle("hidden", state.view !== "folder" || !canEdit());
@@ -907,19 +968,30 @@
 
       grid.innerHTML = "";
       if (!notes.length) {
-        const empty = document.createElement("div"); empty.className = "empty";
+        const empty = document.createElement("div"); 
+        empty.className = "empty";
         empty.innerHTML = `<div style="font-size:30px;margin-bottom:8px">♡</div><strong>nothing here just yet</strong><p style="margin:8px 0 0;font-size:13px">make a little memory of your own.</p>`;
-        grid.appendChild(empty); return;
+        grid.appendChild(empty); 
+        return;
       }
 
       notes.forEach(note => {
-        const card = document.createElement("article"); card.className = "note-card";
+        const card = document.createElement("article"); 
+        card.className = "note-card";
+        
         const photo = note.photoUrl ? `<img class="note-photo" src="${escapeHTML(note.photoUrl)}" alt="Photo attached" loading="lazy">` : "";
         const favBtn = canEdit() ? `<button class="btn btn-light btn-small" data-action="favorite">${note.favorite ? "♥ saved" : "♡ favorite"}</button>` : "";
         const editBtn = canEdit() ? `<button class="btn btn-light btn-small" data-action="edit">edit</button>` : "";
         const delBtn = canEdit() ? `<button class="btn btn-danger btn-small" data-action="delete">delete</button>` : "";
 
-        card.innerHTML = `<h3>${escapeHTML(note.title || "untitled note")}</h3>${photo}<div class="note-preview">${escapeHTML(note.body || "")}</div><div class="note-meta">${escapeHTML(formatDate(note.updatedAt))}</div><div class="card-actions">${favBtn}${editBtn}${delBtn}</div>`;
+        card.innerHTML = `
+          <h3>${escapeHTML(note.title || "untitled note")}</h3>
+          ${photo}
+          <div class="note-preview">${escapeHTML(note.body || "")}</div>
+          <div class="note-meta">${escapeHTML(formatDate(note.updatedAt))}</div>
+          <div class="card-actions">${favBtn}${editBtn}${delBtn}</div>
+        `;
+        
         card.querySelector('[data-action="favorite"]')?.addEventListener("click", () => toggleFavorite(note));
         card.querySelector('[data-action="edit"]')?.addEventListener("click", () => showEditor(note));
         card.querySelector('[data-action="delete"]')?.addEventListener("click", () => deleteNote(note));
@@ -928,78 +1000,137 @@
     }
 
     function populateFolderSelect(selectedId = "") {
-      const select = $("noteFolder"); select.innerHTML = '<option value="">no folder</option>';
+      const select = $("noteFolder"); 
+      select.innerHTML = '<option value="">no folder</option>';
       state.folders.forEach(f => {
-        const option = document.createElement("option"); option.value = f.id; option.textContent = f.name; select.appendChild(option);
+        const option = document.createElement("option"); 
+        option.value = f.id; 
+        option.textContent = f.name; 
+        select.appendChild(option);
       });
       select.value = selectedId;
     }
 
     function clearPhotoSelection() {
-      state.selectedPhoto = null; state.selectedPhotoUrl = null;
-      $("notePhoto").value = ""; $("photoPreview").src = ""; $("photoPreview").classList.add("hidden");
+      state.selectedPhoto = null; 
+      state.selectedPhotoUrl = null;
+      $("notePhoto").value = ""; 
+      $("photoPreview").src = ""; 
+      $("photoPreview").classList.add("hidden");
     }
 
     function showEditor(note = null) {
       if (!canEdit()) return;
-      state.editingId = note?.id || null; clearPhotoSelection();
+      state.editingId = note?.id || null; 
+      clearPhotoSelection();
+      
       $("editorHeading").textContent = note ? "edit your note ♡" : "a new little thought ♡";
-      $("noteTitle").value = note?.title \vert{}\vert{} ""; $("noteBody").value = note?.body || "";
+      $("noteTitle").value = note?.title || ""; 
+      $("noteBody").value = note?.body || "";
       populateFolderSelect(note?.folderId || "");
       $("saveNoteButton").textContent = note ? "save changes ♡" : "save note ♡";
       $("editor").classList.remove("hidden");
+      
       if (note?.photoUrl) {
-        state.selectedPhotoUrl = note.photoUrl; $("photoPreview").src = note.photoUrl; $("photoPreview").classList.remove("hidden");
+        state.selectedPhotoUrl = note.photoUrl; 
+        $("photoPreview").src = note.photoUrl; 
+        $("photoPreview").classList.remove("hidden");
       }
+      
       $("editor").scrollIntoView({ behavior: "smooth", block: "start" });
       $("noteTitle").focus({ preventScroll: true });
     }
 
     $("newNoteButton").addEventListener("click", () => showEditor());
-    $("cancelEditorButton").addEventListener("click", () => { $("editor").classList.add("hidden"); $("noteForm").reset(); state.editingId = null; clearPhotoSelection(); });
+    
+    $("cancelEditorButton").addEventListener("click", () => { 
+      $("editor").classList.add("hidden"); 
+      $("noteForm").reset(); 
+      state.editingId = null; 
+      clearPhotoSelection(); 
+    });
 
     $("notePhoto").addEventListener("change", () => {
-      const file = $("notePhoto").files?.[0]; if (!file) return;
-      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) { toast("please choose an image smaller than 8 MB."); $("notePhoto").value = ""; return; }
+      const file = $("notePhoto").files?.[0]; 
+      if (!file) return;
+      
+      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) { 
+        toast("please choose an image smaller than 8 MB."); 
+        $("notePhoto").value = ""; 
+        return; 
+      }
+      
       state.selectedPhoto = file;
       if (state.selectedPhotoUrl?.startsWith("blob:")) URL.revokeObjectURL(state.selectedPhotoUrl);
+      
       state.selectedPhotoUrl = URL.createObjectURL(file);
-      $("photoPreview").src = state.selectedPhotoUrl; $("photoPreview").classList.remove("hidden");
+      $("photoPreview").src = state.selectedPhotoUrl; 
+      $("photoPreview").classList.remove("hidden");
     });
 
     async function uploadPhoto(file) {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = `photos/${Date.now()}_${safeName}`; const photoRef = ref(storage, path);
+      const path = `photos/${Date.now()}_${safeName}`; 
+      const photoRef = ref(storage, path);
       await uploadBytes(photoRef, file, { contentType: file.type });
       return { url: await getDownloadURL(photoRef), path };
     }
 
     $("noteForm").addEventListener("submit", async event => {
-      event.preventDefault(); if (!canEdit()) return;
-      const title = $("noteTitle").value.trim(), body = $("noteBody").value.trim();
+      event.preventDefault(); 
+      if (!canEdit()) return;
+      
+      const title = $("noteTitle").value.trim();
+      const body = $("noteBody").value.trim();
       if (!title || !body) { toast("please add a title and your note."); return; }
 
-      const saveButton = $("saveNoteButton"); saveButton.disabled = true; saveButton.textContent = "saving…";
+      const saveButton = $("saveNoteButton"); 
+      saveButton.disabled = true; 
+      saveButton.textContent = "saving…";
+      
       const oldNote = state.notes.find(n => n.id === state.editingId);
-      let photoUrl = oldNote?.photoUrl || state.selectedPhotoUrl || "", photoPath = oldNote?.photoPath || "";
+      let photoUrl = oldNote?.photoUrl || state.selectedPhotoUrl || "";
+      let photoPath = oldNote?.photoPath || "";
 
       try {
         if (state.selectedPhoto) {
           const uploaded = await uploadPhoto(state.selectedPhoto);
-          photoUrl = uploaded.url; photoPath = uploaded.path;
+          photoUrl = uploaded.url; 
+          photoPath = uploaded.path;
         }
-        const data = { title, body, folderId: $("noteFolder").value || "", photoUrl, photoPath, favorite: Boolean(oldNote?.favorite), updatedAt: serverTimestamp() };
-        if (state.editingId) { await updateDoc(doc(db, "notes", state.editingId), data); toast("your note has been updated ♡"); }
-        else { await addDoc(collection(db, "notes"), { ...data, createdAt: serverTimestamp() }); toast("your note has been saved ♡"); }
+        
+        const data = { 
+          title, body, folderId: $("noteFolder").value || "", 
+          photoUrl, photoPath, favorite: Boolean(oldNote?.favorite), 
+          updatedAt: serverTimestamp() 
+        };
+        
+        if (state.editingId) { 
+          await updateDoc(doc(db, "notes", state.editingId), data); 
+          toast("your note has been updated ♡"); 
+        } else { 
+          await addDoc(collection(db, "notes"), { ...data, createdAt: serverTimestamp() }); 
+          toast("your note has been saved ♡"); 
+        }
+        
         $("cancelEditorButton").click();
-      } catch (error) { console.error(error); toast("could not save. check your connection."); }
-      finally { saveButton.disabled = false; saveButton.textContent = state.editingId ? "save changes ♡" : "save note ♡"; }
+      } catch (error) { 
+        console.error(error); 
+        toast("could not save. check your connection."); 
+      } finally { 
+        saveButton.disabled = false; 
+        saveButton.textContent = state.editingId ? "save changes ♡" : "save note ♡"; 
+      }
     });
 
     async function toggleFavorite(note) {
       if (!canEdit()) return;
-      try { await updateDoc(doc(db, "notes", note.id), { favorite: !note.favorite, updatedAt: serverTimestamp() }); }
-      catch (error) { console.error(error); toast("could not update favorite."); }
+      try { 
+        await updateDoc(doc(db, "notes", note.id), { favorite: !note.favorite, updatedAt: serverTimestamp() }); 
+      } catch (error) { 
+        console.error(error); 
+        toast("could not update favorite."); 
+      }
     }
 
     async function deleteNote(note) {
@@ -1007,107 +1138,188 @@
       if (!confirm(`delete "${note.title}"? this cannot be undone.`)) return;
       try {
         await deleteDoc(doc(db, "notes", note.id));
-        if (note.photoPath) try { await deleteObject(ref(storage, note.photoPath)); } catch (e) {}
+        if (note.photoPath) {
+          try { await deleteObject(ref(storage, note.photoPath)); } 
+          catch (e) { console.error("Storage delete failed:", e); }
+        }
         toast("note deleted ♡");
-      } catch (error) { console.error(error); toast("deletion failed."); }
+      } catch (error) { 
+        console.error(error); 
+        toast("deletion failed."); 
+      }
     }
     
     // ==========================================================
-    // BOOKS LOGIC (With delete included)
+    // BOOKS LOGIC 
     // ==========================================================
     
     function renderBooks() {
-      const grid = $("bookGrid"); if (!grid) return;
-      grid.innerHTML = ""; const books = sortNewest(state.books);
+      const grid = $("bookGrid"); 
+      if (!grid) return;
+      
+      grid.innerHTML = ""; 
+      const books = sortNewest(state.books);
 
       if (!books.length) {
-        const empty = document.createElement("div"); empty.className = "empty";
+        const empty = document.createElement("div"); 
+        empty.className = "empty";
         empty.innerHTML = `<div style="font-size:30px;margin-bottom:8px">📖</div><strong>no books published yet</strong><p style="margin:8px 0 0;font-size:13px">our library is waiting for its first story.</p>`;
-        grid.appendChild(empty); return;
+        grid.appendChild(empty); 
+        return;
       }
 
       books.forEach(book => {
-        const card = document.createElement("article"); card.className = "note-card";
+        const card = document.createElement("article"); 
+        card.className = "note-card";
+        
         const cover = book.coverUrl ? `<img class="note-photo" src="${escapeHTML(book.coverUrl)}" alt="Cover of ${escapeHTML(book.title)}" loading="lazy">` : "";
         const readBtn = book.link ? `<a href="${escapeHTML(book.link)}" target="_blank" class="btn btn-light btn-small" style="text-decoration:none">read book</a>` : "";
         const delBtn = canEdit() ? `<button class="btn btn-danger btn-small" data-action="delete-book">delete</button>` : "";
 
-        card.innerHTML = `<h3>${escapeHTML(book.title)}</h3>${cover}<div class="note-preview">${escapeHTML(book.synopsis)}</div><div class="note-meta">Published: ${escapeHTML(formatDate(book.createdAt))}</div><div class="card-actions" style="margin-top:14px">${readBtn}${delBtn}</div>`;
+        card.innerHTML = `
+          <h3>${escapeHTML(book.title)}</h3>
+          ${cover}
+          <div class="note-preview">${escapeHTML(book.synopsis)}</div>
+          <div class="note-meta">Published: ${escapeHTML(formatDate(book.createdAt))}</div>
+          <div class="card-actions" style="margin-top:14px">${readBtn}${delBtn}</div>
+        `;
+        
         card.querySelector('[data-action="delete-book"]')?.addEventListener("click", () => deleteBook(book));
         grid.appendChild(card);
       });
     }
 
-    let selectedBookCover = null; let selectedBookCoverUrl = null;
+    let selectedBookCover = null; 
+    let selectedBookCoverUrl = null;
 
     $("newBookButton").addEventListener("click", () => {
-      $("bookEditor").classList.remove("hidden"); $("bookTitle").focus({ preventScroll: true });
+      $("bookEditor").classList.remove("hidden"); 
+      $("bookTitle").focus({ preventScroll: true });
     });
 
     $("cancelBookButton").addEventListener("click", () => {
-      $("bookEditor").classList.add("hidden"); $("bookForm").reset();
+      $("bookEditor").classList.add("hidden"); 
+      $("bookForm").reset();
       selectedBookCover = null;
+      
       if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
-      selectedBookCoverUrl = null; $("bookCoverPreview").src = ""; $("bookCoverPreview").classList.add("hidden");
+      selectedBookCoverUrl = null; 
+      $("bookCoverPreview").src = ""; 
+      $("bookCoverPreview").classList.add("hidden");
     });
 
     $("bookCover").addEventListener("change", () => {
-      const file = $("bookCover").files?.[0]; if (!file) return;
-      if (!file.type.startsWith("image/")) { toast("please choose an image file for the cover."); $("bookCover").value = ""; return; }
+      const file = $("bookCover").files?.[0]; 
+      if (!file) return;
+      
+      if (!file.type.startsWith("image/")) { 
+        toast("please choose an image file for the cover."); 
+        $("bookCover").value = ""; 
+        return; 
+      }
+      
       selectedBookCover = file;
       if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
+      
       selectedBookCoverUrl = URL.createObjectURL(file);
-      $("bookCoverPreview").src = selectedBookCoverUrl; $("bookCoverPreview").classList.remove("hidden");
+      $("bookCoverPreview").src = selectedBookCoverUrl; 
+      $("bookCoverPreview").classList.remove("hidden");
     });
 
     $("bookForm").addEventListener("submit", async event => {
-      event.preventDefault(); if (!canEdit()) return;
-      const title = $("bookTitle").value.trim(), synopsis = $("bookSynopsis").value.trim(), link = $("bookLink").value.trim();
-      if (!title || !synopsis) { toast("please add a title and synopsis."); return; }
+      event.preventDefault(); 
+      if (!canEdit()) return;
+      
+      const title = $("bookTitle").value.trim();
+      const synopsis = $("bookSynopsis").value.trim();
+      const link = $("bookLink").value.trim();
+      
+      if (!title || !synopsis) { 
+        toast("please add a title and synopsis."); 
+        return; 
+      }
 
-      const saveBtn = $("saveBookButton"); saveBtn.disabled = true; saveBtn.textContent = "publishing…";
+      const saveBtn = $("saveBookButton"); 
+      saveBtn.disabled = true; 
+      saveBtn.textContent = "publishing…";
+      
       try {
         let coverUrl = "", coverPath = "";
-        if (selectedBookCover) { const uploaded = await uploadPhoto(selectedBookCover); coverUrl = uploaded.url; coverPath = uploaded.path; }
-        await addDoc(collection(db, "books"), { title, synopsis, link, coverUrl, coverPath, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-        toast("your book has been published ♡"); $("cancelBookButton").click();
-      } catch (error) { console.error(error); toast("could not publish. check connections."); }
-      finally { saveBtn.disabled = false; saveBtn.textContent = "publish book ♡"; }
+        if (selectedBookCover) { 
+          const uploaded = await uploadPhoto(selectedBookCover); 
+          coverUrl = uploaded.url; 
+          coverPath = uploaded.path; 
+        }
+        
+        await addDoc(collection(db, "books"), { 
+          title, synopsis, link, coverUrl, coverPath, 
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp() 
+        });
+        
+        toast("your book has been published ♡"); 
+        $("cancelBookButton").click();
+      } catch (error) { 
+        console.error(error); 
+        toast("could not publish. check connections."); 
+      } finally { 
+        saveBtn.disabled = false; 
+        saveBtn.textContent = "publish book ♡"; 
+      }
     });
 
-    // Delete Book execution
     async function deleteBook(book) {
       if (!canEdit()) return;
       if (!confirm(`delete "${book.title}" from the library?`)) return;
+      
       try {
         await deleteDoc(doc(db, "books", book.id));
-        if (book.coverPath) try { await deleteObject(ref(storage, book.coverPath)); } catch (e) {}
+        if (book.coverPath) {
+          try { await deleteObject(ref(storage, book.coverPath)); } 
+          catch (e) { console.error("Cover delete failed:", e); }
+        }
         toast("book deleted ♡");
-      } catch (error) { console.error(error); toast("deletion failed."); }
+      } catch (error) { 
+        console.error(error); 
+        toast("deletion failed."); 
+      }
     }
 
     // ==========================================================
-    // ANNIVERSARY & INIT
+    // ANNIVERSARY TIMER
     // ==========================================================
     function getNextAnniversary(now) {
-      let year = now.getFullYear(), target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
-      if (now >= target) { year += 1; target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0); }
+      let year = now.getFullYear();
+      let target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
+      if (now >= target) { 
+        year += 1; 
+        target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0); 
+      }
       return { target, year };
     }
 
     function updateAnniversary() {
-      const now = new Date(); const { target, year } = getNextAnniversary(now);
+      const now = new Date(); 
+      const { target, year } = getNextAnniversary(now);
       const diff = Math.max(0, target.getTime() - now.getTime());
+      
       $("days").textContent = Math.floor(diff / 86400000);
       $("hours").textContent = Math.floor((diff % 86400000) / 3600000);
       $("minutes").textContent = Math.floor((diff % 3600000) / 60000);
       $("seconds").textContent = Math.floor((diff % 60000) / 1000);
+      
       const yearsTogether = year - ANNIVERSARY_START_YEAR;
       $("anniversaryCaption").textContent = `counting down to May 19, ${year} · ${yearsTogether} year${yearsTogether === 1 ? "" : "s"} since our first anniversary ♡`;
     }
 
-    $("refreshButton").addEventListener("click", () => { renderFolders(); renderNotes(); renderBooks(); toast("your page has been refreshed ♡"); });
-    updateAnniversary(); setInterval(updateAnniversary, 1000);
+    $("refreshButton").addEventListener("click", () => { 
+      renderFolders(); 
+      renderNotes(); 
+      renderBooks(); 
+      toast("your page has been refreshed ♡"); 
+    });
+    
+    updateAnniversary(); 
+    setInterval(updateAnniversary, 1000);
   </script>
 </body>
 </html>
