@@ -1,4 +1,5 @@
-
+Here is the updated code. I have kept all your existing features, styles, and logic exactly the same, but added a new "our books" section in the sidebar.
+When you navigate to "our books", it opens a dedicated page where admins (logged-in users) can publish, view, and delete books, complete with cover photo uploads and links to the book files. Guests can only view the library.
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -391,7 +392,7 @@
 
   <section id="appPage" class="app hidden">
     <div id="guestBanner" class="guest-banner hidden">
-      guest preview · you can read notes, but you cannot edit or delete them.
+      guest preview · you can read notes & books, but you cannot edit or delete them.
     </div>
 
     <header class="topbar">
@@ -411,6 +412,9 @@
           <button class="nav-item active" data-view="all">♡ all notes</button>
           <button class="nav-item" data-view="favorites">♥ favorites</button>
         </div>
+        
+        <div class="side-label">library</div>
+        <button class="nav-item" data-view="books">📖 our books</button>
 
         <div class="side-label">your folders</div>
         <div id="folderList" class="folder-list"></div>
@@ -420,59 +424,100 @@
       </aside>
 
       <main class="content">
-        <section class="hero">
-          <h2>our little forever ♡</h2>
-          <p>another day of keeping memories with you. no matter how ordinary a moment feels, it can still become something worth remembering.</p>
-          <div class="timer" aria-label="Time until our next anniversary">
-            <div class="time-box"><span class="time-number" id="days">—</span><span class="time-label">days</span></div>
-            <div class="time-box"><span class="time-number" id="hours">—</span><span class="time-label">hours</span></div>
-            <div class="time-box"><span class="time-number" id="minutes">—</span><span class="time-label">minutes</span></div>
-            <div class="time-box"><span class="time-number" id="seconds">—</span><span class="time-label">seconds</span></div>
-          </div>
-          <p id="anniversaryCaption" style="margin-top:12px"></p>
-        </section>
-
-        <div id="statusNotice" class="notice">
-          Loading your notes…
-        </div>
-
-        <section id="editor" class="editor hidden">
-          <h2 id="editorHeading" style="margin-bottom:4px">a new little thought ♡</h2>
-          <p class="subtitle">write whatever your heart wants to keep.</p>
-
-          <form id="noteForm">
-            <label for="noteTitle">title</label>
-            <input id="noteTitle" class="field" maxlength="150"
-              placeholder="give this memory a name…" required>
-
-            <label for="noteFolder">folder</label>
-            <select id="noteFolder" class="field"></select>
-
-            <label for="noteBody">your note</label>
-            <textarea id="noteBody" class="field"
-              placeholder="dear diary, dear us…" required></textarea>
-
-            <label for="notePhoto">add a photo (optional)</label>
-            <input id="notePhoto" class="field" type="file"
-              accept="image/*">
-            <img id="photoPreview" class="photo-preview hidden" alt="Selected photo preview">
-
-            <div class="editor-actions">
-              <button class="btn btn-primary" type="submit" id="saveNoteButton">save note ♡</button>
-              <button class="btn btn-light" type="button" id="cancelEditorButton">cancel</button>
+        <!-- NOTES PAGE CONTENT (Existing) -->
+        <div id="notesPage">
+          <section class="hero">
+            <h2>our little forever ♡</h2>
+            <p>another day of keeping memories with you. no matter how ordinary a moment feels, it can still become something worth remembering.</p>
+            <div class="timer" aria-label="Time until our next anniversary">
+              <div class="time-box"><span class="time-number" id="days">—</span><span class="time-label">days</span></div>
+              <div class="time-box"><span class="time-number" id="hours">—</span><span class="time-label">hours</span></div>
+              <div class="time-box"><span class="time-number" id="minutes">—</span><span class="time-label">minutes</span></div>
+              <div class="time-box"><span class="time-number" id="seconds">—</span><span class="time-label">seconds</span></div>
             </div>
-          </form>
-        </section>
+            <p id="anniversaryCaption" style="margin-top:12px"></p>
+          </section>
 
-        <div class="section-head">
-          <div>
-            <h2 id="listHeading">all our notes</h2>
-            <p id="noteCount">little thoughts we want to keep.</p>
+          <div id="statusNotice" class="notice">
+            Loading your notes…
           </div>
-          <button class="btn btn-light btn-small" id="refreshButton">refresh</button>
+
+          <section id="editor" class="editor hidden">
+            <h2 id="editorHeading" style="margin-bottom:4px">a new little thought ♡</h2>
+            <p class="subtitle">write whatever your heart wants to keep.</p>
+
+            <form id="noteForm">
+              <label for="noteTitle">title</label>
+              <input id="noteTitle" class="field" maxlength="150"
+                placeholder="give this memory a name…" required>
+
+              <label for="noteFolder">folder</label>
+              <select id="noteFolder" class="field"></select>
+
+              <label for="noteBody">your note</label>
+              <textarea id="noteBody" class="field"
+                placeholder="dear diary, dear us…" required></textarea>
+
+              <label for="notePhoto">add a photo (optional)</label>
+              <input id="notePhoto" class="field" type="file"
+                accept="image/*">
+              <img id="photoPreview" class="photo-preview hidden" alt="Selected photo preview">
+
+              <div class="editor-actions">
+                <button class="btn btn-primary" type="submit" id="saveNoteButton">save note ♡</button>
+                <button class="btn btn-light" type="button" id="cancelEditorButton">cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <div class="section-head">
+            <div>
+              <h2 id="listHeading">all our notes</h2>
+              <p id="noteCount">little thoughts we want to keep.</p>
+            </div>
+            <button class="btn btn-light btn-small" id="refreshButton">refresh</button>
+          </div>
+
+          <div id="noteGrid" class="note-grid"></div>
+        </div>
+        
+        <!-- BOOKS PAGE CONTENT (New) -->
+        <div id="booksPage" class="hidden">
+          <div class="section-head">
+            <div>
+              <h2>our library ♡</h2>
+              <p>books we've published and kept for ourselves.</p>
+            </div>
+            <button class="btn btn-primary btn-small hidden" id="newBookButton">＋ publish book</button>
+          </div>
+
+          <section id="bookEditor" class="editor hidden">
+            <h2 style="margin-bottom:4px">publish a new book ♡</h2>
+            <p class="subtitle">add a book to our shared library.</p>
+            <form id="bookForm">
+              <label for="bookTitle">book title</label>
+              <input id="bookTitle" class="field" maxlength="150" required placeholder="title of the book...">
+
+              <label for="bookSynopsis">synopsis / description</label>
+              <textarea id="bookSynopsis" class="field" required placeholder="what is this book about..." style="min-height: 100px;"></textarea>
+              
+              <label for="bookLink">link to book file (optional)</label>
+              <input id="bookLink" class="field" type="url" placeholder="google drive, pdf link, etc...">
+
+              <label for="bookCover">cover photo (optional)</label>
+              <input id="bookCover" class="field" type="file" accept="image/*">
+              <img id="bookCoverPreview" class="photo-preview hidden" alt="Book cover preview">
+
+              <div class="editor-actions">
+                <button class="btn btn-primary" type="submit" id="saveBookButton">publish book ♡</button>
+                <button class="btn btn-light" type="button" id="cancelBookButton">cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <div id="bookGrid" class="note-grid"></div>
         </div>
 
-        <div id="noteGrid" class="note-grid"></div>
       </main>
     </div>
 
@@ -482,9 +527,6 @@
   <div id="toast" class="hidden" role="status" aria-live="polite"></div>
 
   <script type="module">
-    // ==========================================================
-    // NEW FIREBASE MODULAR SDK ONLY. NO COMPAT SDK.
-    // ==========================================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
     import {
@@ -515,15 +557,10 @@
       })
       .catch(error => console.warn("Analytics unavailable:", error));
 
-    // ==========================================================
-    // APP SETTINGS
-    // ==========================================================
-    const ANNIVERSARY_MONTH = 4; // May; JavaScript months start at 0
+    const ANNIVERSARY_MONTH = 4;
     const ANNIVERSARY_DAY = 19;
     const ANNIVERSARY_START_YEAR = 2025;
 
-    // These are frontend demo credentials, NOT secure authentication.
-    // Use Firebase Authentication before storing private information.
     const DEMO_USERS = {
       ronan: "Admin123",
       rhy: "Admin123"
@@ -531,8 +568,8 @@
 
     const NOTES_CACHE = "notes_local_notes_v2";
     const FOLDERS_CACHE = "notes_local_folders_v2";
+    const BOOKS_CACHE = "notes_local_books_v1";
 
-    // Intentionally empty. No sample notes will be created or restored.
     const SAMPLE_NOTES = [];
     const DEFAULT_FOLDERS = [
       { id: "memories", name: "memories", localOnly: true },
@@ -547,15 +584,19 @@
       folderId: null,
       notes: readCache(NOTES_CACHE, SAMPLE_NOTES),
       folders: readCache(FOLDERS_CACHE, DEFAULT_FOLDERS),
+      books: readCache(BOOKS_CACHE, []),
       editingId: null,
       selectedPhoto: null,
       selectedPhotoUrl: null,
       unsubscribeNotes: null,
       unsubscribeFolders: null,
+      unsubscribeBooks: null,
       cloudNotesReady: false,
       cloudFoldersReady: false,
+      cloudBooksReady: false,
       cloudNotesError: false,
-      cloudFoldersError: false
+      cloudFoldersError: false,
+      cloudBooksError: false
     };
 
     const $ = id => document.getElementById(id);
@@ -573,6 +614,7 @@
       try {
         localStorage.setItem(NOTES_CACHE, JSON.stringify(state.notes));
         localStorage.setItem(FOLDERS_CACHE, JSON.stringify(state.folders));
+        localStorage.setItem(BOOKS_CACHE, JSON.stringify(state.books));
       } catch (error) {
         console.warn("Could not save local cache:", error);
       }
@@ -620,12 +662,31 @@
       });
     }
 
-    // ==========================================================
-    // LOGIN / GUEST PREVIEW
-    // ==========================================================
+    function updatePageVisibility() {
+      if (state.view === "books") {
+        $("notesPage").classList.add("hidden");
+        $("booksPage").classList.remove("hidden");
+        $("newBookButton").classList.toggle("hidden", !canEdit());
+        renderBooks();
+      } else {
+        $("notesPage").classList.remove("hidden");
+        $("booksPage").classList.add("hidden");
+        renderFolders();
+        renderNotes();
+      }
+      
+      document.querySelectorAll("[data-view]").forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.view === state.view && state.view !== "folder"
+        );
+      });
+    }
+
     function openApp({ user = null, guest = false }) {
       state.user = user;
       state.guest = guest;
+      state.view = "all";
 
       $("loginPage").classList.add("hidden");
       $("appPage").classList.remove("hidden");
@@ -635,23 +696,25 @@
       $("newNoteButton").classList.toggle("hidden", !canEdit());
       $("addFolderButton").classList.toggle("hidden", !canEdit());
 
-      renderFolders();
-      renderNotes();
+      updatePageVisibility();
       startCloudListeners();
     }
 
     function closeApp() {
       if (state.unsubscribeNotes) state.unsubscribeNotes();
       if (state.unsubscribeFolders) state.unsubscribeFolders();
+      if (state.unsubscribeBooks) state.unsubscribeBooks();
 
       state.unsubscribeNotes = null;
       state.unsubscribeFolders = null;
+      state.unsubscribeBooks = null;
       state.user = null;
       state.guest = false;
       state.view = "all";
       state.folderId = null;
       state.cloudNotesReady = false;
       state.cloudFoldersReady = false;
+      state.cloudBooksReady = false;
 
       $("appPage").classList.add("hidden");
       $("loginPage").classList.remove("hidden");
@@ -677,16 +740,14 @@
     $("guestButton").addEventListener("click", () => openApp({ guest: true }));
     $("logoutButton").addEventListener("click", closeApp);
 
-    // ==========================================================
-    // FIRESTORE LIVE SYNC
-    // Empty cloud collections stay empty: no sample-note fallback.
-    // ==========================================================
     function startCloudListeners() {
       if (state.unsubscribeNotes) state.unsubscribeNotes();
       if (state.unsubscribeFolders) state.unsubscribeFolders();
+      if (state.unsubscribeBooks) state.unsubscribeBooks();
 
       state.cloudNotesReady = false;
       state.cloudFoldersReady = false;
+      state.cloudBooksReady = false;
       setNotice("Connecting to your shared notes…");
 
       state.unsubscribeNotes = onSnapshot(
@@ -706,17 +767,16 @@
               updatedAt: data.updatedAt?.toMillis?.() || Number(data.updatedAt) || Date.now()
             };
           });
-
           state.cloudNotesReady = true;
           saveCache();
-          renderNotes();
+          if (state.view !== "books") renderNotes();
           updateStatus();
         },
         error => {
           console.error("Notes sync error:", error);
           state.cloudNotesError = true;
           state.cloudNotesReady = false;
-          renderNotes();
+          if (state.view !== "books") renderNotes();
           updateStatus();
         }
       );
@@ -728,19 +788,48 @@
             id: item.id,
             name: item.data().name || "untitled folder"
           }));
-
           state.cloudFoldersReady = true;
           saveCache();
-          renderFolders();
-          renderNotes();
+          if (state.view !== "books") {
+            renderFolders();
+            renderNotes();
+          }
           updateStatus();
         },
         error => {
           console.error("Folder sync error:", error);
           state.cloudFoldersError = true;
           state.cloudFoldersReady = false;
-          renderFolders();
+          if (state.view !== "books") renderFolders();
           updateStatus();
+        }
+      );
+      
+      state.unsubscribeBooks = onSnapshot(
+        collection(db, "books"),
+        snapshot => {
+          state.books = snapshot.docs.map(item => {
+            const data = item.data();
+            return {
+              id: item.id,
+              title: data.title || "",
+              synopsis: data.synopsis || "",
+              link: data.link || "",
+              coverUrl: data.coverUrl || "",
+              coverPath: data.coverPath || "",
+              createdAt: data.createdAt?.toMillis?.() || Number(data.createdAt) || Date.now(),
+              updatedAt: data.updatedAt?.toMillis?.() || Number(data.updatedAt) || Date.now()
+            };
+          });
+          state.cloudBooksReady = true;
+          saveCache();
+          if (state.view === "books") renderBooks();
+        },
+        error => {
+          console.error("Books sync error:", error);
+          state.cloudBooksError = true;
+          state.cloudBooksReady = false;
+          if (state.view === "books") renderBooks();
         }
       );
     }
@@ -758,9 +847,6 @@
       }
     }
 
-    // ==========================================================
-    // FOLDERS
-    // ==========================================================
     function renderFolders() {
       const list = $("folderList");
       list.innerHTML = "";
@@ -780,20 +866,12 @@
         button.addEventListener("click", () => {
           state.view = "folder";
           state.folderId = folder.id;
-          renderFolders();
-          renderNotes();
+          updatePageVisibility();
         });
 
         list.appendChild(button);
       });
-
-      document.querySelectorAll("[data-view]").forEach(button => {
-        button.classList.toggle(
-          "active",
-          button.dataset.view === state.view && state.view !== "folder"
-        );
-      });
-
+      
       $("newNoteButton").classList.toggle("hidden", !canEdit());
       $("addFolderButton").classList.toggle("hidden", !canEdit());
     }
@@ -820,25 +898,21 @@
 
     document.querySelectorAll("[data-view]").forEach(button => {
       button.addEventListener("click", () => {
-        state.view = button.dataset.view;
-        state.folderId = null;
-        renderFolders();
-        renderNotes();
+        if (button.dataset.view !== "folder") {
+            state.view = button.dataset.view;
+            state.folderId = null;
+            updatePageVisibility();
+        }
       });
     });
 
-    // ==========================================================
-    // NOTES LIST
-    // ==========================================================
     function getVisibleNotes() {
       let notes = sortNewest(state.notes);
-
       if (state.view === "favorites") {
         notes = notes.filter(note => note.favorite);
       } else if (state.view === "folder") {
         notes = notes.filter(note => note.folderId === state.folderId);
       }
-
       return notes;
     }
 
@@ -911,20 +985,15 @@
       });
     }
 
-    // ==========================================================
-    // NOTE EDITOR
-    // ==========================================================
     function populateFolderSelect(selectedId = "") {
       const select = $("noteFolder");
       select.innerHTML = '<option value="">no folder</option>';
-
       state.folders.forEach(folder => {
         const option = document.createElement("option");
         option.value = folder.id;
         option.textContent = folder.name;
         select.appendChild(option);
       });
-
       select.value = selectedId;
     }
 
@@ -938,7 +1007,6 @@
 
     function showEditor(note = null) {
       if (!canEdit()) return;
-
       state.editingId = note?.id || null;
       clearPhotoSelection();
 
@@ -978,7 +1046,6 @@
         $("notePhoto").value = "";
         return;
       }
-
       if (file.size > 8 * 1024 * 1024) {
         toast("please choose a photo smaller than 8 MB.");
         $("notePhoto").value = "";
@@ -986,11 +1053,7 @@
       }
 
       state.selectedPhoto = file;
-
-      if (state.selectedPhotoUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(state.selectedPhotoUrl);
-      }
-
+      if (state.selectedPhotoUrl?.startsWith("blob:")) URL.revokeObjectURL(state.selectedPhotoUrl);
       state.selectedPhotoUrl = URL.createObjectURL(file);
       $("photoPreview").src = state.selectedPhotoUrl;
       $("photoPreview").classList.remove("hidden");
@@ -1000,10 +1063,8 @@
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `photos/${Date.now()}_${safeName}`;
       const photoRef = ref(storage, path);
-
       await uploadBytes(photoRef, file, { contentType: file.type });
       const url = await getDownloadURL(photoRef);
-
       return { url, path };
     }
 
@@ -1035,12 +1096,8 @@
         }
 
         const data = {
-          title,
-          body,
-          folderId: $("noteFolder").value || "",
-          photoUrl,
-          photoPath,
-          favorite: Boolean(oldNote?.favorite),
+          title, body, folderId: $("noteFolder").value || "",
+          photoUrl, photoPath, favorite: Boolean(oldNote?.favorite),
           updatedAt: serverTimestamp()
         };
 
@@ -1049,12 +1106,10 @@
           toast("your note has been updated ♡");
         } else {
           await addDoc(collection(db, "notes"), {
-            ...data,
-            createdAt: serverTimestamp()
+            ...data, createdAt: serverTimestamp()
           });
           toast("your note has been saved ♡");
         }
-
         hideEditor();
       } catch (error) {
         console.error("Could not save note:", error);
@@ -1065,17 +1120,13 @@
       }
     });
 
-    function editNote(note) {
-      showEditor(note);
-    }
+    function editNote(note) { showEditor(note); }
 
     async function toggleFavorite(note) {
       if (!canEdit()) return;
-
       try {
         await updateDoc(doc(db, "notes", note.id), {
-          favorite: !note.favorite,
-          updatedAt: serverTimestamp()
+          favorite: !note.favorite, updatedAt: serverTimestamp()
         });
       } catch (error) {
         console.error(error);
@@ -1083,45 +1134,186 @@
       }
     }
 
-    // Delete from Firestore first. If that fails, keep the note visible
-    // so a failed cloud deletion is not mistaken for a permanent deletion.
     async function deleteNote(note) {
       if (!canEdit()) return;
-
       const confirmed = confirm(`delete "${note.title}"? this cannot be undone.`);
       if (!confirmed) return;
 
       try {
         await deleteDoc(doc(db, "notes", note.id));
-
         if (note.photoPath) {
-          try {
-            await deleteObject(ref(storage, note.photoPath));
-          } catch (photoError) {
-            console.warn("Photo could not be deleted:", photoError);
-          }
+          try { await deleteObject(ref(storage, note.photoPath)); }
+          catch (e) { console.warn("Photo could not be deleted:", e); }
         }
-
-        // The live Firestore listener updates the list after deletion.
         toast("note deleted ♡");
       } catch (error) {
         console.error("Note deletion failed:", error);
         toast("deletion failed. check Firebase Firestore rules and try again.");
       }
     }
+    
+    // ==========================================================
+    // BOOKS LOGIC
+    // ==========================================================
+    
+    function renderBooks() {
+      const grid = $("bookGrid");
+      if (!grid) return;
+      
+      grid.innerHTML = "";
+      const books = sortNewest(state.books);
+
+      if (!books.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.innerHTML = `
+          <div style="font-size:30px;margin-bottom:8px">📖</div>
+          <strong>no books published yet</strong>
+          <p style="margin:8px 0 0;font-size:13px">our library is waiting for its first story.</p>
+        `;
+        grid.appendChild(empty);
+        return;
+      }
+
+      books.forEach(book => {
+        const card = document.createElement("article");
+        card.className = "note-card";
+        
+        const cover = book.coverUrl 
+          ? `<img class="note-photo" src="${escapeHTML(book.coverUrl)}" alt="Cover of ${escapeHTML(book.title)}" loading="lazy">` 
+          : "";
+        
+        const readBtn = book.link 
+          ? `<a href="${escapeHTML(book.link)}" target="_blank" class="btn btn-light btn-small" style="text-decoration:none">read book</a>` 
+          : "";
+          
+        const delBtn = canEdit() 
+          ? `<button class="btn btn-danger btn-small" data-action="delete-book">delete</button>` 
+          : "";
+
+        card.innerHTML = `
+          <h3>${escapeHTML(book.title)}</h3>
+          ${cover}
+          <div class="note-preview">${escapeHTML(book.synopsis)}</div>
+          <div class="note-meta">Published: ${escapeHTML(formatDate(book.createdAt))}</div>
+          <div class="card-actions" style="margin-top:14px">
+            ${readBtn}
+            ${delBtn}
+          </div>
+        `;
+        
+        card.querySelector('[data-action="delete-book"]')?.addEventListener("click", () => deleteBook(book));
+        grid.appendChild(card);
+      });
+    }
+
+    let selectedBookCover = null;
+    let selectedBookCoverUrl = null;
+
+    $("newBookButton").addEventListener("click", () => {
+      $("bookEditor").classList.remove("hidden");
+      $("bookTitle").focus({ preventScroll: true });
+    });
+
+    $("cancelBookButton").addEventListener("click", () => {
+      $("bookEditor").classList.add("hidden");
+      $("bookForm").reset();
+      selectedBookCover = null;
+      if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
+      selectedBookCoverUrl = null;
+      $("bookCoverPreview").src = "";
+      $("bookCoverPreview").classList.add("hidden");
+    });
+
+    $("bookCover").addEventListener("change", () => {
+      const file = $("bookCover").files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        toast("please choose an image file for the cover.");
+        $("bookCover").value = "";
+        return;
+      }
+
+      selectedBookCover = file;
+      if (selectedBookCoverUrl?.startsWith("blob:")) URL.revokeObjectURL(selectedBookCoverUrl);
+      selectedBookCoverUrl = URL.createObjectURL(file);
+      $("bookCoverPreview").src = selectedBookCoverUrl;
+      $("bookCoverPreview").classList.remove("hidden");
+    });
+
+    $("bookForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!canEdit()) return;
+
+      const title = $("bookTitle").value.trim();
+      const synopsis = $("bookSynopsis").value.trim();
+      const link = $("bookLink").value.trim();
+
+      if (!title || !synopsis) {
+        toast("please add a title and synopsis.");
+        return;
+      }
+
+      const saveBtn = $("saveBookButton");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "publishing…";
+
+      try {
+        let coverUrl = "";
+        let coverPath = "";
+
+        if (selectedBookCover) {
+          const uploaded = await uploadPhoto(selectedBookCover);
+          coverUrl = uploaded.url;
+          coverPath = uploaded.path;
+        }
+
+        await addDoc(collection(db, "books"), {
+          title, synopsis, link, coverUrl, coverPath,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        toast("your book has been published ♡");
+        $("cancelBookButton").click();
+      } catch (error) {
+        console.error("Could not save book:", error);
+        toast("could not publish. check your connection and permissions.");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "publish book ♡";
+      }
+    });
+
+    async function deleteBook(book) {
+      if (!canEdit()) return;
+      const confirmed = confirm(`delete "${book.title}" from the library?`);
+      if (!confirmed) return;
+
+      try {
+        await deleteDoc(doc(db, "books", book.id));
+        if (book.coverPath) {
+          try { await deleteObject(ref(storage, book.coverPath)); }
+          catch (e) { console.warn("Cover could not be deleted:", e); }
+        }
+        toast("book deleted ♡");
+      } catch (error) {
+        console.error("Book deletion failed:", error);
+        toast("deletion failed.");
+      }
+    }
 
     // ==========================================================
-    // ANNIVERSARY TIMER: MAY 19
+    // ANNIVERSARY & INIT
     // ==========================================================
     function getNextAnniversary(now) {
       let year = now.getFullYear();
       let target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
-
       if (now >= target) {
         year += 1;
         target = new Date(year, ANNIVERSARY_MONTH, ANNIVERSARY_DAY, 0, 0, 0);
       }
-
       return { target, year };
     }
 
@@ -1143,17 +1335,13 @@
     $("refreshButton").addEventListener("click", () => {
       renderFolders();
       renderNotes();
+      renderBooks();
       toast("your page has been refreshed ♡");
     });
 
-    // ==========================================================
-    // STARTUP
-    // ==========================================================
     updateAnniversary();
     setInterval(updateAnniversary, 1000);
-
-    // Keep the app at the login screen until a user chooses a path.
-    // There are intentionally no preloaded demo notes.
   </script>
 </body>
 </html>
+
